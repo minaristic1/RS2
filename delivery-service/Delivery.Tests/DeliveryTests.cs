@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Delivery.Api.Models;
 using Xunit;
 
@@ -6,10 +7,32 @@ namespace Delivery.Tests
 {
     public class DeliveryTests
     {
+        private DeliveryOrder CreateTestDelivery()
+        {
+            var items = new List<OrderItem>
+            {
+                new OrderItem { Id = Guid.NewGuid(), ProductName = "Pizza", Quantity = 1, UnitPrice = 800 }
+            };
+
+            var delivery = new DeliveryOrder(
+                orderId: Guid.NewGuid(),
+                customerName: "Marko Marković",
+                customerPhone: "0611234567",
+                restaurantId: Guid.NewGuid(),
+                restaurantName: "Pizzeria Roma",
+                pickupAddress: "Restoranska 1",
+                deliveryAddress: "Bulevar Kralja Aleksandra 1",
+                totalPrice: 800
+            );
+            delivery.Items = items;
+
+            return delivery;
+        }
+
         [Fact]
         public void NewDelivery_StartsWithCreatedStatus()
         {
-            var delivery = new DeliveryOrder(Guid.NewGuid(), "Bulevar Kralja Aleksandra 1");
+            var delivery = CreateTestDelivery();
 
             Assert.Equal(DeliveryStatus.Created, delivery.Status);
         }
@@ -17,7 +40,7 @@ namespace Delivery.Tests
         [Fact]
         public void AdvanceStatus_MovesToNextStatusInSequence()
         {
-            var delivery = new DeliveryOrder(Guid.NewGuid(), "Bulevar Kralja Aleksandra 1");
+            var delivery = CreateTestDelivery();
 
             delivery.AdvanceStatus();
 
@@ -27,7 +50,7 @@ namespace Delivery.Tests
         [Fact]
         public void AdvanceStatus_AfterDelivered_ThrowsInvalidOperationException()
         {
-            var delivery = new DeliveryOrder(Guid.NewGuid(), "Bulevar Kralja Aleksandra 1");
+            var delivery = CreateTestDelivery();
             delivery.AdvanceStatus(); // Confirmed
             delivery.AdvanceStatus(); // Preparing
             delivery.AdvanceStatus(); // OutForDelivery
@@ -39,7 +62,7 @@ namespace Delivery.Tests
         [Fact]
         public void AdvanceStatus_AfterCancelled_ThrowsInvalidOperationException()
         {
-            var delivery = new DeliveryOrder(Guid.NewGuid(), "Bulevar Kralja Aleksandra 1");
+            var delivery = CreateTestDelivery();
             delivery.Cancel();
 
             Assert.Throws<InvalidOperationException>(() => delivery.AdvanceStatus());
@@ -48,7 +71,7 @@ namespace Delivery.Tests
         [Fact]
         public void AdvanceStatus_ToDelivered_SetsDeliveredAt()
         {
-            var delivery = new DeliveryOrder(Guid.NewGuid(), "Bulevar Kralja Aleksandra 1");
+            var delivery = CreateTestDelivery();
 
             Assert.Null(delivery.DeliveredAt);
 
@@ -63,7 +86,7 @@ namespace Delivery.Tests
         [Fact]
         public void Cancel_SetsStatusAndCancelledAt()
         {
-            var delivery = new DeliveryOrder(Guid.NewGuid(), "Bulevar Kralja Aleksandra 1");
+            var delivery = CreateTestDelivery();
 
             delivery.Cancel();
 
@@ -74,7 +97,7 @@ namespace Delivery.Tests
         [Fact]
         public void Cancel_AfterDelivered_ThrowsInvalidOperationException()
         {
-            var delivery = new DeliveryOrder(Guid.NewGuid(), "Bulevar Kralja Aleksandra 1");
+            var delivery = CreateTestDelivery();
             delivery.AdvanceStatus();
             delivery.AdvanceStatus();
             delivery.AdvanceStatus();

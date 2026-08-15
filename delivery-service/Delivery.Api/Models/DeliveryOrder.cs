@@ -4,17 +4,40 @@ namespace Delivery.Api.Models
     {
         public Guid Id { get; set; }
         public Guid OrderId { get; set; }
+        public string CustomerName { get; set; }
+        public string CustomerPhone { get; set; }
+        public Guid RestaurantId { get; set; }
+        public string RestaurantName { get; set; }
+        public string PickupAddress { get; set; }
         public string DeliveryAddress { get; set; }
+        public decimal TotalPrice { get; set; }
         public DeliveryStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? DeliveredAt { get; set; }
         public DateTime? CancelledAt { get; set; }
+        public Guid? CourierId { get; set; }
+        public DateTime? EstimatedDeliveryTime { get; set; }
+        public List<OrderItem> Items { get; set; } = new List<OrderItem>();
 
-        public DeliveryOrder(Guid orderId, string deliveryAddress)
+        public DeliveryOrder(
+            Guid orderId,
+            string customerName,
+            string customerPhone,
+            Guid restaurantId,
+            string restaurantName,
+            string pickupAddress,
+            string deliveryAddress,
+            decimal totalPrice)
         {
             Id = Guid.NewGuid();
             OrderId = orderId;
+            CustomerName = customerName;
+            CustomerPhone = customerPhone;
+            RestaurantId = restaurantId;
+            RestaurantName = restaurantName;
+            PickupAddress = pickupAddress;
             DeliveryAddress = deliveryAddress;
+            TotalPrice = totalPrice;
             Status = DeliveryStatus.Created;
             CreatedAt = DateTime.UtcNow;
         }

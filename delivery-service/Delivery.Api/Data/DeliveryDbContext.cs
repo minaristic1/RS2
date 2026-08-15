@@ -10,5 +10,6 @@ namespace Delivery.Api.Data
         }
 
         public DbSet<DeliveryOrder> Deliveries { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
     }
 }
