@@ -1,6 +1,8 @@
 using CartService.Repositories;
 using CartService.Services;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Diagnostics;
+using CartService.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -16,6 +18,32 @@ builder.Services.AddScoped<ICartRepository, RedisCartRepositories>();
 builder.Services.AddScoped<ICartService, CartManager>();
 
 var app = builder.Build();
+
+app.UseExceptionHandler(exceptionHandlerApp =>
+{
+    exceptionHandlerApp.Run(async context =>
+    {
+        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+        if (exception is NotFoundException)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                error = exception.Message
+            });
+            return;
+        }
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+        await context.Response.WriteAsJsonAsync(new
+        {
+            error = "Neočekivana greška."
+        });
+    });
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();

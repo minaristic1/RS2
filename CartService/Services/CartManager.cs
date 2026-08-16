@@ -1,6 +1,7 @@
 using CartService.Domain1;
 using CartService.DTOs;
 using CartService.Repositories;
+using CartService.Exceptions;
 
 namespace CartService.Services;
 
@@ -62,14 +63,14 @@ public class CartManager : ICartService
 
         if (cart is null)
         {
-            throw new InvalidOperationException("Korpa ne postoji.");
+            throw new NotFoundException("Korpa ne postoji.");
         }
 
         var item = cart.Items.FirstOrDefault(item => item.ProductId == productId);
 
         if (item is null)
         {
-            throw new InvalidOperationException("Proizvod ne postoji u korpi.");
+            throw new NotFoundException("Proizvod ne postoji u korpi.");
         }
 
         item.Quantity = request.Quantity;
@@ -85,14 +86,14 @@ public class CartManager : ICartService
 
         if (cart is null)
         {
-            throw new InvalidOperationException("Korpa ne postoji.");
+            throw new NotFoundException("Korpa ne postoji.");
         }
 
         var item = cart.Items.FirstOrDefault(item => item.ProductId == productId);
 
         if (item is null)
         {
-            throw new InvalidOperationException("Proizvod ne postoji u korpi.");
+            throw new NotFoundException("Proizvod ne postoji u korpi.");
         }
 
         cart.Items.Remove(item);
