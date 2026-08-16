@@ -1,4 +1,5 @@
 using CartService.Repositories;
+using CartService.Services;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,8 @@ var redisConnectionString = builder.Configuration.GetConnectionString("Redis")
 builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
 
 builder.Services.AddScoped<ICartRepository, RedisCartRepositories>();
+
+builder.Services.AddScoped<ICartService, CartManager>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
