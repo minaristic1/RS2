@@ -10,6 +10,8 @@ namespace RestaurantService.Domain.Entities
 
         public Guid MenuCategoryId { get; set; }
 
+        public Guid RestaurantId { get; set; }
+
         public string NameSr { get; set; } = string.Empty;
 
         public string NameEn { get; set; } = string.Empty;

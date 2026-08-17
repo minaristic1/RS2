@@ -35,6 +35,11 @@ namespace RestaurantService.Infrastructure.Persistence.Configurations
 
             builder.Property(item => item.Price)
                 .HasPrecision(18, 2);
+
+            builder.Property(item => item.RestaurantId)
+                .IsRequired();
+
+            builder.HasIndex(item => item.RestaurantId);
         }
     }
 }
