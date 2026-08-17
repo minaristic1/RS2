@@ -11,5 +11,18 @@ services:
     volumes:
       - delivery-db-data:/var/lib/postgresql/data
 
+  delivery-api:
+    build:
+      context: ./Delivery.Api
+      dockerfile: Dockerfile
+    container_name: delivery-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - delivery-db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DeliveryDb: "Host=delivery-db;Port=5432;Database=delivery;Username=delivery;Password=delivery"
+
 volumes:
   delivery-db-data:

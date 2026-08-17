@@ -60,12 +60,32 @@ namespace Delivery.Api.Controllers
             return Ok(delivery);
         }
 
-        [HttpGet]
-        public async Task<ActionResult<List<DeliveryOrder>>> GetAll()
+        [HttpGet("by-order/{orderId}")]
+        public async Task<ActionResult<DeliveryOrder>> GetByOrderId(Guid orderId)
         {
-            var deliveries = await _context.Deliveries
+            var delivery = await _context.Deliveries
                 .Include(d => d.Items)
-                .ToListAsync();
+                .FirstOrDefaultAsync(d => d.OrderId == orderId);
+
+            if (delivery == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(delivery);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<List<DeliveryOrder>>> GetAll([FromQuery] DeliveryStatus? status)
+        {
+            var query = _context.Deliveries.Include(d => d.Items).AsQueryable();
+
+            if (status.HasValue)
+            {
+                query = query.Where(d => d.Status == status.Value);
+            }
+
+            var deliveries = await query.ToListAsync();
 
             return Ok(deliveries);
         }
@@ -113,6 +133,22 @@ namespace Delivery.Api.Controllers
                 return BadRequest(ex.Message);
             }
 
+            await _context.SaveChangesAsync();
+
+            return Ok(delivery);
+        }
+
+        [HttpPost("{id}/assign-courier")]
+        public async Task<ActionResult<DeliveryOrder>> AssignCourier(Guid id, [FromQuery] Guid courierId)
+        {
+            var delivery = await _context.Deliveries.FindAsync(id);
+
+            if (delivery == null)
+            {
+                return NotFound();
+            }
+
+            delivery.CourierId = courierId;
             await _context.SaveChangesAsync();
 
             return Ok(delivery);
