@@ -41,6 +41,12 @@ namespace RestaurantService.Infrastructure.Persistence.Configurations
                 .WithMany(menu => menu.Promotions)
                 .HasForeignKey(promotion => promotion.MenuId)
                 .OnDelete(DeleteBehavior.Restrict);
-        }
+
+            builder.ToTable(table => table.HasCheckConstraint(
+                "CK_Promotion_ExactlyOneTarget",
+                "(CASE WHEN MenuItemId IS NOT NULL THEN 1 ELSE 0 END) + " +
+                "(CASE WHEN MenuCategoryId IS NOT NULL THEN 1 ELSE 0 END) + " +
+                "(CASE WHEN MenuId IS NOT NULL THEN 1 ELSE 0 END) = 1"));
+            }
     }
 }
