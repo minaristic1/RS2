@@ -23,4 +23,6 @@ public class RestaurantResponse
     public bool IsActive { get; set; }
 
     public bool IsFeatured { get; set; }
+
+    public string CuisineType { get; set; } = string.Empty;
 }

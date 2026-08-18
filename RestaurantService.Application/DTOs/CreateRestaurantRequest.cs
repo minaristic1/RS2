@@ -19,4 +19,6 @@ public class CreateRestaurantRequest
     public string ImageUrl { get; set; } = string.Empty;
 
     public bool IsFeatured { get; set; }
+
+    public string CuisineType { get; set; } = string.Empty;
 }
