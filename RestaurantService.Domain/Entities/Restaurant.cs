@@ -29,5 +29,7 @@ namespace RestaurantService.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public List<Menu> Menus { get; set; } = new();
+
+        public List<RestaurantOpeningHours> OpeningHours { get; set; } = new();
     }
 }

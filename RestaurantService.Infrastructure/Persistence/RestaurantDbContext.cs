@@ -25,6 +25,8 @@ public class RestaurantDbContext : DbContext
 
     public DbSet<Promotion> Promotions => Set<Promotion>();
 
+    public DbSet<RestaurantOpeningHours> RestaurantOpeningHours => Set<RestaurantOpeningHours>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
