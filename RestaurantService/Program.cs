@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using RestaurantService.Application.Interfaces;
 using RestaurantService.Infrastructure.Persistence;
 using RestaurantService.Infrastructure.Repositories;
+using RestaurantService.Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,8 @@ builder.Services.AddDbContext<RestaurantDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
+
+builder.Services.AddScoped<IRestaurantAppService, RestaurantAppService>();
 
 var app = builder.Build();
 
