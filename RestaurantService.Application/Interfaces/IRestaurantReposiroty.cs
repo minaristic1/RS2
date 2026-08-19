@@ -12,6 +12,8 @@ public interface IRestaurantRepository
 
     Task<Restaurant?> GetByIdAsync(Guid id);
 
+    Task<MenuItem?> GetMenuItemByIdAsync(Guid id);
+
     Task<List<Restaurant>> SearchByNameAsync(string searchTerm);
 
     Task AddAsync(Restaurant restaurant);

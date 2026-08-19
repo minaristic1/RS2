@@ -37,6 +37,25 @@ public class RestaurantAppService : IRestaurantAppService
         return restaurants.Select(MapToResponse).ToList();
     }
 
+    public async Task<MenuItemLookupResponse?> GetMenuItemByIdAsync(Guid id)
+    {
+        var menuItem = await _repository.GetMenuItemByIdAsync(id);
+
+        if (menuItem is null)
+        {
+            return null;
+        }
+
+        return new MenuItemLookupResponse
+        {
+            Id = menuItem.Id,
+            RestaurantId = menuItem.RestaurantId,
+            Name = menuItem.NameSr,
+            Price = menuItem.Price,
+            IsAvailable = menuItem.IsAvailable
+        };
+    }
+
     public async Task<RestaurantResponse> CreateAsync(CreateRestaurantRequest request)
     {
         var restaurant = new Restaurant

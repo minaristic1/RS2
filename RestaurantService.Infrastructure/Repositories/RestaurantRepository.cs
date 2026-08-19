@@ -31,6 +31,13 @@ public class RestaurantRepository : IRestaurantRepository
             .FirstOrDefaultAsync(restaurant => restaurant.Id == id);
     }
 
+    public async Task<MenuItem?> GetMenuItemByIdAsync(Guid id)
+    {
+        return await _context.MenuItems
+            .AsNoTracking()
+            .FirstOrDefaultAsync(menuItem => menuItem.Id == id);
+    }
+
     public async Task<List<Restaurant>> SearchByNameAsync(string searchTerm)
     {
         return await _context.Restaurants
