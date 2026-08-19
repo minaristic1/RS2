@@ -4,6 +4,7 @@ using CartService.Exceptions;
 using CartService.Repositories;
 using CartService.Services;
 using Moq;
+using CartService.Clients;
 
 namespace CartService.Tests.Services;
 
@@ -11,11 +12,13 @@ public class CartManagerTests
 {
     private readonly Mock<ICartRepository> _repositoryMock;
     private readonly CartManager _cartManager;
+    private readonly Mock<IRestaurantClient> _restaurantClientMock;
 
     public CartManagerTests()
     {
         _repositoryMock = new Mock<ICartRepository>();
-        _cartManager = new CartManager(_repositoryMock.Object);
+        _restaurantClientMock = new Mock<IRestaurantClient>();
+        _cartManager = new CartManager(_repositoryMock.Object, _restaurantClientMock.Object);
     }
 
     [Fact]
@@ -37,22 +40,37 @@ public class CartManagerTests
     {
         var userId = Guid.NewGuid();
         var productId = Guid.NewGuid();
-        
+        var restaurantId = Guid.NewGuid();
+ 
         _repositoryMock.Setup(repository => repository.GetCartAsync(userId)).ReturnsAsync((Cart?)null);
-
+ 
+        _restaurantClientMock.Setup(client => client.GetMenuItemAsync(productId)).ReturnsAsync(new MenuItemResponse
+            {
+                Id = productId,
+                RestaurantId = restaurantId,
+                Name = "Capricciosa",
+                Price = 850,
+                IsAvailable = true
+            });
+ 
         var request = new AddCartItemRequest
         {
             ProductId = productId,
             Quantity = 2
         };
-
+ 
         var result = await _cartManager.AddItemAsync(userId, request);
-        
+ 
         Assert.Single(result.Items);
         Assert.Equal(productId, result.Items[0].ProductId);
+        Assert.Equal(restaurantId, result.Items[0].RestaurantId);
+        Assert.Equal("Capricciosa", result.Items[0].ProductName);
+        Assert.Equal(850, result.Items[0].Price);
         Assert.Equal(2, result.Items[0].Quantity);
-        
-        _repositoryMock.Verify(repository => repository.SaveCartAsync(It.IsAny<Cart>()), Times.Once);
+ 
+        _repositoryMock.Verify(
+            repository => repository.SaveCartAsync(It.IsAny<Cart>()),
+            Times.Once);
     }
     
     [Fact]
@@ -60,6 +78,7 @@ public class CartManagerTests
     {
         var userId = Guid.NewGuid();
         var productId = Guid.NewGuid();
+        var restaurantId = Guid.NewGuid();
  
         var cart = new Cart
         {
@@ -69,6 +88,9 @@ public class CartManagerTests
                 new CartItem
                 {
                     ProductId = productId,
+                    RestaurantId = restaurantId,
+                    ProductName = "Capricciosa",
+                    Price = 850,
                     Quantity = 2
                 }
             }
@@ -76,16 +98,40 @@ public class CartManagerTests
  
         _repositoryMock.Setup(repository => repository.GetCartAsync(userId)).ReturnsAsync(cart);
  
+        _restaurantClientMock.Setup(client => client.GetMenuItemAsync(productId)).ReturnsAsync(new MenuItemResponse
+            {
+                Id = productId,
+                RestaurantId = restaurantId,
+                Name = "Capricciosa",
+                Price = 850,
+                IsAvailable = true
+            });
+ 
         var request = new AddCartItemRequest
         {
             ProductId = productId,
             Quantity = 3
         };
- 
+        
         var result = await _cartManager.AddItemAsync(userId, request);
- 
+        
         Assert.Single(result.Items);
+ 
+        Assert.Equal(productId, result.Items[0].ProductId);
+ 
+        Assert.Equal(restaurantId, result.Items[0].RestaurantId);
+ 
+        Assert.Equal("Capricciosa", result.Items[0].ProductName);
+ 
+        Assert.Equal(850, result.Items[0].Price);
+ 
         Assert.Equal(5, result.Items[0].Quantity);
+ 
+        Assert.Equal(4250, result.TotalPrice);
+ 
+        _repositoryMock.Verify(repository => repository.SaveCartAsync(cart), Times.Once);
+ 
+        _restaurantClientMock.Verify(client => client.GetMenuItemAsync(productId), Times.Once);
     }
  
     [Fact]
@@ -210,5 +256,99 @@ public class CartManagerTests
         await _cartManager.ClearCartAsync(userId);
  
         _repositoryMock.Verify(repository => repository.DeleteCartAsync(userId), Times.Once);
+    }
+    
+    [Fact]
+    public async Task AddItemAsync_WhenProductDoesNotExist_ThrowsNotFoundException()
+    {
+        var userId = Guid.NewGuid();
+        var productId = Guid.NewGuid();
+ 
+        _restaurantClientMock.Setup(client => client.GetMenuItemAsync(productId)).ReturnsAsync((MenuItemResponse?)null);
+ 
+        var request = new AddCartItemRequest
+        {
+            ProductId = productId,
+            Quantity = 1
+        };
+ 
+        await Assert.ThrowsAsync<NotFoundException>(() => _cartManager.AddItemAsync(userId, request));
+ 
+        _repositoryMock.Verify(repository => repository.SaveCartAsync(It.IsAny<Cart>()), Times.Never);
+    }
+    
+    [Fact]
+    public async Task AddItemAsync_WhenProductIsUnavailable_ThrowsConflictException()
+    {
+        var userId = Guid.NewGuid();
+        var productId = Guid.NewGuid();
+ 
+        _restaurantClientMock.Setup(client => client.GetMenuItemAsync(productId)).ReturnsAsync(new MenuItemResponse
+            {
+                Id = productId,
+                RestaurantId = Guid.NewGuid(),
+                Name = "Capricciosa",
+                Price = 850,
+                IsAvailable = false
+            });
+ 
+        var request = new AddCartItemRequest
+        {
+            ProductId = productId,
+            Quantity = 1
+        };
+ 
+        await Assert.ThrowsAsync<ConflictException>(() => _cartManager.AddItemAsync(userId, request));
+ 
+        _repositoryMock.Verify(repository => repository.SaveCartAsync(It.IsAny<Cart>()), Times.Never);
+    }
+    
+    [Fact]
+    public async Task AddItemAsync_WhenProductIsFromDifferentRestaurant_ThrowsConflictException()
+    {
+        var userId = Guid.NewGuid();
+     
+        var existingProductId = Guid.NewGuid();
+        var newProductId = Guid.NewGuid();
+     
+        var existingRestaurantId = Guid.NewGuid();
+        var differentRestaurantId = Guid.NewGuid();
+     
+        var cart = new Cart
+        {
+            UserId = userId,
+            Items =
+            {
+                new CartItem
+                {
+                    ProductId = existingProductId,
+                    RestaurantId = existingRestaurantId,
+                    ProductName = "Pizza",
+                    Price = 800,
+                    Quantity = 1
+                }
+            }
+        };
+     
+        _repositoryMock.Setup(repository => repository.GetCartAsync(userId)).ReturnsAsync(cart);
+     
+        _restaurantClientMock.Setup(client => client.GetMenuItemAsync(newProductId)).ReturnsAsync(new MenuItemResponse
+            {
+                Id = newProductId,
+                RestaurantId = differentRestaurantId,
+                Name = "Burger",
+                Price = 700,
+                IsAvailable = true
+            });
+     
+        var request = new AddCartItemRequest
+        {
+            ProductId = newProductId,
+            Quantity = 1
+        };
+     
+        await Assert.ThrowsAsync<ConflictException>(() => _cartManager.AddItemAsync(userId, request));
+     
+        _repositoryMock.Verify(repository => repository.SaveCartAsync(It.IsAny<Cart>()), Times.Never);
     }
 }

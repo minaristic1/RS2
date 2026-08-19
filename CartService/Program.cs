@@ -3,6 +3,7 @@ using CartService.Services;
 using StackExchange.Redis;
 using Microsoft.AspNetCore.Diagnostics;
 using CartService.Exceptions;
+using CartService.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -17,6 +18,14 @@ builder.Services.AddScoped<ICartRepository, RedisCartRepositories>();
 
 builder.Services.AddScoped<ICartService, CartManager>();
 
+var restaurantServiceUrl = builder.Configuration["Services:RestaurantService"] 
+                           ?? throw new InvalidOperationException("Restaurant service url is not configured.");
+
+builder.Services.AddHttpClient<IRestaurantClient, RestaurantClient>(client =>
+{
+    client.BaseAddress = new Uri(restaurantServiceUrl);
+});
+
 var app = builder.Build();
 
 app.UseExceptionHandler(exceptionHandlerApp =>
@@ -27,6 +36,17 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         if (exception is NotFoundException)
         {
             context.Response.StatusCode = StatusCodes.Status404NotFound;
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                error = exception.Message
+            });
+            return;
+        }
+
+        if (exception is ConflictException)
+        {
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
 
             await context.Response.WriteAsJsonAsync(new
             {
