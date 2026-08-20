@@ -1,0 +1,27 @@
+services:
+  restaurant-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: restaurant-db
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong@Passw0rd"
+    ports:
+      - "1433:1433"
+    volumes:
+      - restaurant-db-data:/var/opt/mssql
+
+  restaurant-api:
+    build:
+      context: .
+      dockerfile: RestaurantService/Dockerfile
+    container_name: restaurant-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - restaurant-db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__RestaurantDb: "Server=restaurant-db;Database=RestaurantServiceDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True"
+
+volumes:
+  restaurant-db-data:

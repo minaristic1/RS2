@@ -9,6 +9,8 @@ using RestaurantService.Application.Interfaces;
 
 namespace RestaurantService.Controllers;
 
+[ApiController]
+[Route("api/restaurants")]
 public class RestaurantsController : ControllerBase
 {
     private readonly IRestaurantAppService _restaurantAppService;

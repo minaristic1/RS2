@@ -12,10 +12,13 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["RestaurantService.csproj", "."]
-RUN dotnet restore "./RestaurantService.csproj"
+COPY ["RestaurantService/RestaurantService.csproj", "RestaurantService/"]
+COPY ["RestaurantService.Application/RestaurantService.Application.csproj", "RestaurantService.Application/"]
+COPY ["RestaurantService.Domain/RestaurantService.Domain.csproj", "RestaurantService.Domain/"]
+COPY ["RestaurantService.Infrastructure/RestaurantService.Infrastructure.csproj", "RestaurantService.Infrastructure/"]
+RUN dotnet restore "./RestaurantService/RestaurantService.csproj"
 COPY . .
-WORKDIR "/src/."
+WORKDIR "/src/RestaurantService"
 RUN dotnet build "./RestaurantService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
