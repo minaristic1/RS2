@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Delivery.Api.Models;
+using Delivery.Data.Models;
 using Xunit;
 
 namespace Delivery.Tests

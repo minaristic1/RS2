@@ -1,8 +1,8 @@
 using Grpc.Core;
-using Delivery.Api.Data;
-using Delivery.Api.Protos;
+using Delivery.Data;
+using Delivery.GRPC.Protos;
 
-namespace Delivery.Api.Services
+namespace Delivery.GRPC.Services
 {
     public class DeliveryGrpcServiceImpl : DeliveryGrpcService.DeliveryGrpcServiceBase
     {

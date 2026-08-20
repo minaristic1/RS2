@@ -1,5 +1,5 @@
 
-namespace Delivery.Api.Models
+namespace Delivery.Data.Models
 {
     public enum DeliveryStatus
     {

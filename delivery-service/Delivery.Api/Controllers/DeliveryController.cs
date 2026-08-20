@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Delivery.Api.Data;
-using Delivery.Api.Models;
+using Delivery.Data;
+using Delivery.Data.Models;
 using Delivery.Api.DTOs;
 
 namespace Delivery.Api.Controllers

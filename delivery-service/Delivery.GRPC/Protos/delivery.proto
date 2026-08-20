@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Delivery.Api.Protos";
+option csharp_namespace = "Delivery.GRPC.Protos";
 
 package delivery;
 

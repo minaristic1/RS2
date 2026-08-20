@@ -1,4 +1,4 @@
-namespace Delivery.Api.Models
+namespace Delivery.Data.Models
 {
     public class DeliveryOrder
     {

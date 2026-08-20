@@ -13,11 +13,23 @@ services:
 
   delivery-api:
     build:
-      context: ./Delivery.Api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Delivery.Api/Dockerfile
     container_name: delivery-api
     ports:
       - "8080:8080"
+    depends_on:
+      - delivery-db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DeliveryDb: "Host=delivery-db;Port=5432;Database=delivery;Username=delivery;Password=delivery"
+
+  delivery-grpc:
+    build:
+      context: .
+      dockerfile: Delivery.GRPC/Dockerfile
+    container_name: delivery-grpc
+    ports:
       - "8081:8081"
     depends_on:
       - delivery-db

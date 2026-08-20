@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Delivery.Api.Models;
+using Delivery.Data.Models;
 
-namespace Delivery.Api.Data
+namespace Delivery.Data
 {
     public class DeliveryDbContext : DbContext
     {
