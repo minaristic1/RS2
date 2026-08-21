@@ -4,6 +4,7 @@ using StackExchange.Redis;
 using Microsoft.AspNetCore.Diagnostics;
 using CartService.Exceptions;
 using CartService.Clients;
+using CartService.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -17,6 +18,8 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Conn
 builder.Services.AddScoped<ICartRepository, RedisCartRepositories>();
 
 builder.Services.AddScoped<ICartService, CartManager>();
+
+builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
 
 var restaurantServiceUrl = builder.Configuration["Services:RestaurantService"] 
                            ?? throw new InvalidOperationException("Restaurant service url is not configured.");

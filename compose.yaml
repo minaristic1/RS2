@@ -4,6 +4,17 @@ services:
     container_name: grizgo-redis
     ports:
       - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: grizgo-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: grizgo
+      RABBITMQ_DEFAULT_PASS: grizgo123
+
   cart-service:
     build:
       context: .
@@ -15,3 +26,4 @@ services:
       - ConnectionStrings__Redis=redis:6379
     depends_on:
       - redis
+      - rabbitmq

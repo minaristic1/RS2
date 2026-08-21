@@ -5,6 +5,8 @@ using CartService.Repositories;
 using CartService.Services;
 using Moq;
 using CartService.Clients;
+using CartService.Messaging;
+using CartService.Events;
 
 namespace CartService.Tests.Services;
 
@@ -13,12 +15,14 @@ public class CartManagerTests
     private readonly Mock<ICartRepository> _repositoryMock;
     private readonly CartManager _cartManager;
     private readonly Mock<IRestaurantClient> _restaurantClientMock;
+    private readonly Mock<IRabbitMqPublisher> _rabbitMqPublisherMock;
 
     public CartManagerTests()
     {
         _repositoryMock = new Mock<ICartRepository>();
         _restaurantClientMock = new Mock<IRestaurantClient>();
-        _cartManager = new CartManager(_repositoryMock.Object, _restaurantClientMock.Object);
+        _rabbitMqPublisherMock = new Mock<IRabbitMqPublisher>();
+        _cartManager = new CartManager(_repositoryMock.Object, _restaurantClientMock.Object, _rabbitMqPublisherMock.Object);
     }
 
     [Fact]
@@ -350,5 +354,104 @@ public class CartManagerTests
         await Assert.ThrowsAsync<ConflictException>(() => _cartManager.AddItemAsync(userId, request));
      
         _repositoryMock.Verify(repository => repository.SaveCartAsync(It.IsAny<Cart>()), Times.Never);
+    }
+    
+    [Fact]
+    public async Task CheckoutAsync_WhenCartDoesNotExist_ThrowsNotFoundException()
+    {
+        var userId = Guid.NewGuid();
+ 
+        _repositoryMock
+            .Setup(repository => repository.GetCartAsync(userId))
+            .ReturnsAsync((Cart?)null);
+        
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            _cartManager.CheckoutAsync(userId));
+ 
+        _rabbitMqPublisherMock.Verify(
+            publisher => publisher.PublishCartCheckedOutAsync(
+                It.IsAny<CartCheckedOutEvent>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+ 
+        _repositoryMock.Verify(
+            repository => repository.DeleteCartAsync(userId),
+            Times.Never);
+    }
+    
+    [Fact]
+    public async Task CheckoutAsync_WhenCartIsEmpty_ThrowsNotFoundException()
+    {
+        var userId = Guid.NewGuid();
+ 
+        var cart = new Cart
+        {
+            UserId = userId
+        };
+ 
+        _repositoryMock
+            .Setup(repository => repository.GetCartAsync(userId))
+            .ReturnsAsync(cart);
+        
+        await Assert.ThrowsAsync<NotFoundException>(() =>
+            _cartManager.CheckoutAsync(userId));
+ 
+        _rabbitMqPublisherMock.Verify(
+            publisher => publisher.PublishCartCheckedOutAsync(
+                It.IsAny<CartCheckedOutEvent>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+ 
+        _repositoryMock.Verify(
+            repository => repository.DeleteCartAsync(userId),
+            Times.Never);
+    }
+    
+    [Fact]
+    public async Task CheckoutAsync_WhenCartHasItems_PublishesEventAndDeletesCart()
+    {
+        var userId = Guid.NewGuid();
+        var restaurantId = Guid.NewGuid();
+        var productId = Guid.NewGuid();
+ 
+        var cart = new Cart
+        {
+            UserId = userId,
+            Items =
+            {
+                new CartItem
+                {
+                    ProductId = productId,
+                    RestaurantId = restaurantId,
+                    ProductName = "Capricciosa",
+                    Price = 850,
+                    Quantity = 2
+                }
+            }
+        };
+ 
+        _repositoryMock
+            .Setup(repository => repository.GetCartAsync(userId))
+            .ReturnsAsync(cart);
+        
+        await _cartManager.CheckoutAsync(userId);
+        
+        _rabbitMqPublisherMock.Verify(
+            publisher => publisher.PublishCartCheckedOutAsync(
+                It.Is<CartCheckedOutEvent>(message =>
+                    message.UserId == userId &&
+                    message.RestaurantId == restaurantId &&
+                    message.TotalPrice == 1700 &&
+                    message.Items.Count == 1 &&
+                    message.Items[0].ProductId == productId &&
+                    message.Items[0].ProductName == "Capricciosa" &&
+                    message.Items[0].Price == 850 &&
+                    message.Items[0].Quantity == 2),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+ 
+        _repositoryMock.Verify(
+            repository => repository.DeleteCartAsync(userId),
+            Times.Once);
     }
 }

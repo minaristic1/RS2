@@ -53,4 +53,12 @@ public class CartController : ControllerBase
         await _cartService.ClearCartAsync(userId);
         return NoContent();
     }
+    
+    [HttpPost("{userId:guid}/checkout")]
+    public async Task<IActionResult> Checkout(Guid userId)
+    {
+        await _cartService.CheckoutAsync(userId);
+ 
+        return Accepted();
+    }
 }

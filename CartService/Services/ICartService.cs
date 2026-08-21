@@ -13,4 +13,6 @@ public interface ICartService
     Task<CartResponse> RemoveItemAsync(Guid userId, Guid productId);
     
     Task ClearCartAsync(Guid userId);
+
+    Task CheckoutAsync(Guid userId);
 }

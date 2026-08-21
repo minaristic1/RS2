@@ -3,6 +3,8 @@ using CartService.DTOs;
 using CartService.Repositories;
 using CartService.Exceptions;
 using CartService.Clients;
+using CartService.Events;
+using CartService.Messaging;
 
 namespace CartService.Services;
 
@@ -10,11 +12,13 @@ public class CartManager : ICartService
 {
     private readonly ICartRepository _cartRepository;
     private readonly IRestaurantClient _restaurantClient;
+    private readonly IRabbitMqPublisher _rabbitMqPublisher;
 
-    public CartManager(ICartRepository cartRepository, IRestaurantClient restaurantClient)
+    public CartManager(ICartRepository cartRepository, IRestaurantClient restaurantClient, IRabbitMqPublisher rabbitMqPublisher)
     {
         _cartRepository = cartRepository;
         _restaurantClient = restaurantClient;
+        _rabbitMqPublisher = rabbitMqPublisher;
     }
 
     public async Task<CartResponse> GetCartAsync(Guid userId)
@@ -136,6 +140,39 @@ public class CartManager : ICartService
 
     public async Task ClearCartAsync(Guid userId)
     {
+        await _cartRepository.DeleteCartAsync(userId);
+    }
+    
+    public async Task CheckoutAsync(Guid userId)
+    {
+        var cart = await _cartRepository.GetCartAsync(userId);
+ 
+        if (cart is null || cart.Items.Count == 0)
+        {
+            throw new NotFoundException(
+                "Korpa ne postoji ili je prazna.");
+        }
+ 
+        var checkoutEvent = new CartCheckedOutEvent
+        {
+            UserId = cart.UserId,
+            RestaurantId = cart.Items.First().RestaurantId,
+            TotalPrice = cart.TotalPrice,
+            CreatedAt = DateTime.UtcNow,
+ 
+            Items = cart.Items.Select(item =>
+                new CartCheckedOutItem
+                {
+                    ProductId = item.ProductId,
+                    ProductName = item.ProductName,
+                    Price = item.Price,
+                    Quantity = item.Quantity
+                }).ToList()
+        };
+ 
+        await _rabbitMqPublisher.PublishCartCheckedOutAsync(
+            checkoutEvent);
+ 
         await _cartRepository.DeleteCartAsync(userId);
     }
 
