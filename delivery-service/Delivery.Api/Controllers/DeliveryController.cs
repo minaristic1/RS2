@@ -1,8 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Delivery.Data;
+using MediatR;
 using Delivery.Data.Models;
-using Delivery.Api.DTOs;
+using Delivery.Api.Features.Deliveries.Commands.CreateDeliveryOrder;
+using Delivery.Api.Features.Deliveries.Commands.AdvanceDeliveryStatus;
+using Delivery.Api.Features.Deliveries.Commands.CancelDelivery;
+using Delivery.Api.Features.Deliveries.Commands.AssignCourier;
+using Delivery.Api.Features.Deliveries.Queries.GetDeliveryById;
+using Delivery.Api.Features.Deliveries.Queries.GetDeliveryByOrderId;
+using Delivery.Api.Features.Deliveries.Queries.GetAllDeliveries;
 
 namespace Delivery.Api.Controllers
 {
@@ -10,47 +15,24 @@ namespace Delivery.Api.Controllers
     [Route("api/[controller]")]
     public class DeliveryController : ControllerBase
     {
-        private readonly DeliveryDbContext _context;
+        private readonly IMediator _mediator;
 
-        public DeliveryController(DeliveryDbContext context)
+        public DeliveryController(IMediator mediator)
         {
-            _context = context;
+            _mediator = mediator;
         }
 
         [HttpPost]
-        public async Task<ActionResult<DeliveryOrder>> Create(CreateDeliveryOrderRequest request)
+        public async Task<ActionResult<DeliveryOrder>> Create(CreateDeliveryOrderCommand command)
         {
-            var delivery = new DeliveryOrder(
-                request.OrderId,
-                request.CustomerName,
-                request.CustomerPhone,
-                request.RestaurantId,
-                request.RestaurantName,
-                request.PickupAddress,
-                request.DeliveryAddress,
-                request.TotalPrice
-            );
-
-            delivery.Items = request.Items.Select(item => new OrderItem
-            {
-                Id = Guid.NewGuid(),
-                ProductName = item.ProductName,
-                Quantity = item.Quantity,
-                UnitPrice = item.UnitPrice
-            }).ToList();
-
-            _context.Deliveries.Add(delivery);
-            await _context.SaveChangesAsync();
-
+            var delivery = await _mediator.Send(command);
             return Created($"/api/delivery/{delivery.Id}", delivery);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<DeliveryOrder>> GetById(Guid id)
         {
-            var delivery = await _context.Deliveries
-                .Include(d => d.Items)
-                .FirstOrDefaultAsync(d => d.Id == id);
+            var delivery = await _mediator.Send(new GetDeliveryByIdQuery(id));
 
             if (delivery == null)
             {
@@ -63,9 +45,7 @@ namespace Delivery.Api.Controllers
         [HttpGet("by-order/{orderId}")]
         public async Task<ActionResult<DeliveryOrder>> GetByOrderId(Guid orderId)
         {
-            var delivery = await _context.Deliveries
-                .Include(d => d.Items)
-                .FirstOrDefaultAsync(d => d.OrderId == orderId);
+            var delivery = await _mediator.Send(new GetDeliveryByOrderIdQuery(orderId));
 
             if (delivery == null)
             {
@@ -78,14 +58,7 @@ namespace Delivery.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<DeliveryOrder>>> GetAll([FromQuery] DeliveryStatus? status)
         {
-            var query = _context.Deliveries.Include(d => d.Items).AsQueryable();
-
-            if (status.HasValue)
-            {
-                query = query.Where(d => d.Status == status.Value);
-            }
-
-            var deliveries = await query.ToListAsync();
+            var deliveries = await _mediator.Send(new GetAllDeliveriesQuery(status));
 
             return Ok(deliveries);
         }
@@ -93,63 +66,52 @@ namespace Delivery.Api.Controllers
         [HttpPost("{id}/advance-status")]
         public async Task<ActionResult<DeliveryOrder>> AdvanceStatus(Guid id)
         {
-            var delivery = await _context.Deliveries.FindAsync(id);
-
-            if (delivery == null)
-            {
-                return NotFound();
-            }
-
             try
             {
-                delivery.AdvanceStatus();
+                var delivery = await _mediator.Send(new AdvanceDeliveryStatusCommand(id));
+
+                if (delivery == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(delivery);
             }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
             }
-
-            await _context.SaveChangesAsync();
-
-            return Ok(delivery);
         }
 
         [HttpPost("{id}/cancel")]
         public async Task<ActionResult<DeliveryOrder>> Cancel(Guid id)
         {
-            var delivery = await _context.Deliveries.FindAsync(id);
-
-            if (delivery == null)
-            {
-                return NotFound();
-            }
-
             try
             {
-                delivery.Cancel();
+                var delivery = await _mediator.Send(new CancelDeliveryCommand(id));
+
+                if (delivery == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(delivery);
             }
             catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
             }
-
-            await _context.SaveChangesAsync();
-
-            return Ok(delivery);
         }
 
         [HttpPost("{id}/assign-courier")]
         public async Task<ActionResult<DeliveryOrder>> AssignCourier(Guid id, [FromQuery] Guid courierId)
         {
-            var delivery = await _context.Deliveries.FindAsync(id);
+            var delivery = await _mediator.Send(new AssignCourierCommand(id, courierId));
 
             if (delivery == null)
             {
                 return NotFound();
             }
-
-            delivery.CourierId = courierId;
-            await _context.SaveChangesAsync();
 
             return Ok(delivery);
         }
