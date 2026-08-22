@@ -1,3 +1,4 @@
+using Delivery.Api.Messaging;
 using Delivery.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,8 @@ builder.Services.AddDbContext<DeliveryDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DeliveryDb")));
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+builder.Services.AddHostedService<OrderReadyForDeliveryConsumer>();
 
 var app = builder.Build();
 

@@ -11,6 +11,21 @@ services:
     volumes:
       - delivery-db-data:/var/lib/postgresql/data
 
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: delivery-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: grizgo
+      RABBITMQ_DEFAULT_PASS: grizgo123
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   delivery-api:
     build:
       context: .
@@ -19,10 +34,14 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - delivery-db
+      delivery-db:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DeliveryDb: "Host=delivery-db;Port=5432;Database=delivery;Username=delivery;Password=delivery"
+      RabbitMq__Host: rabbitmq
 
   delivery-grpc:
     build:
