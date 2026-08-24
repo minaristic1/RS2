@@ -1,0 +1,12 @@
+<Solution>
+  <Project Path="ApiGateway/ApiGateway.csproj" />
+  <Folder Name="/Common/">
+    <Project Path="Common/EventBus.Messages/EventBus.Messages.csproj" />
+  </Folder>
+  <Folder Name="/Services/Billing/">
+    <Project Path="Services/Billing/Billing.API/Billing.API.csproj" />
+    <Project Path="Services/Billing/Billing.Application/Billing.Application.csproj" />
+    <Project Path="Services/Billing/Billing.Domain/Billing.Domain.csproj" />
+    <Project Path="Services/Billing/Billing.Infrastructure/Billing.Infrastructure.csproj" />
+  </Folder>
+</Solution>
