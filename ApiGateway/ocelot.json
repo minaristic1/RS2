@@ -24,7 +24,7 @@
       }
     },
     {
-      "DownstreamPathTemplate": "/api/delivery/{everything}",
+      "DownstreamPathTemplate": "/api/delivery",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -32,10 +32,110 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/api/delivery/{everything}",
+      "UpstreamPathTemplate": "/api/delivery",
       "UpstreamHttpMethod": [
         "GET",
         "POST"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/delivery/by-order/{orderId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/delivery/by-order/{orderId}",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/delivery/{id}/advance-status",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/delivery/{id}/advance-status",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/delivery/{id}/cancel",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/delivery/{id}/cancel",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/delivery/{id}/assign-courier",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/delivery/{id}/assign-courier",
+      "UpstreamHttpMethod": [
+        "POST"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/delivery/{id}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 8080
+        }
+      ],
+      "UpstreamPathTemplate": "/api/delivery/{id}",
+      "UpstreamHttpMethod": [
+        "GET"
       ],
       "RateLimitOptions": {
         "EnableRateLimiting": true,
