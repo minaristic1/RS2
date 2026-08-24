@@ -1,7 +1,25 @@
 @Billing_API_HostAddress = http://localhost:5000
 
-GET {{Billing_API_HostAddress}}/
-Accept: application/json
+POST {{Billing_API_HostAddress}}/api/invoices
+Content-Type: application/json
+
+{
+  "orderId": "5be9d604-f4fc-4f29-b9db-a23eb440d339",
+  "customerId": "b3fae20f-2afd-4796-af05-c5fa52d48c86",
+  "currency": "RSD",
+  "items": [
+    {
+      "productId": "a84fb69f-6f96-4433-8ff4-27ced3ad9c70",
+      "name": "Burger",
+      "quantity": 2,
+      "unitPrice": 650
+    }
+  ]
+}
 
 ###
 
+GET {{Billing_API_HostAddress}}/api/invoices/{{invoiceId}}
+Accept: application/json
+
+###
