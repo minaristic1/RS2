@@ -1,0 +1,31 @@
+<div class="tracking-container">
+  <h2>Prati svoju porudžbinu</h2>
+
+  <div class="search-box">
+    <input [(ngModel)]="orderId" placeholder="Unesi Order ID" />
+    <button (click)="search()">Pretraži</button>
+  </div>
+
+  @if (loading()) {
+    <p>Učitavanje...</p>
+  }
+
+  @if (notFound()) {
+    <p class="error">Porudžbina nije pronađena.</p>
+  }
+
+  @if (delivery(); as d) {
+    <div class="delivery-card">
+      <p><strong>Status:</strong> {{ statusLabel(d.status) }}</p>
+      <p><strong>Restoran:</strong> {{ d.restaurantName }}</p>
+      <p><strong>Adresa dostave:</strong> {{ d.deliveryAddress }}</p>
+      <p><strong>Ukupno:</strong> {{ d.totalPrice }} RSD</p>
+      <h3>Stavke:</h3>
+      <ul>
+        @for (item of d.items; track item.id) {
+          <li>{{ item.productName }} x{{ item.quantity }} - {{ item.unitPrice }} RSD</li>
+        }
+      </ul>
+    </div>
+  }
+</div>
