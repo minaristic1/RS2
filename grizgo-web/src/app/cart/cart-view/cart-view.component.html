@@ -1,0 +1,31 @@
+<div class="cart-container">
+  <h2>Moja korpa</h2>
+
+  @if (loading()) {
+    <p>Učitavanje...</p>
+  }
+
+  @if (cart(); as c) {
+    @if (c.items.length === 0) {
+      <p>Korpa je prazna.</p>
+    } @else {
+      <ul class="cart-items">
+        @for (item of c.items; track item.productId) {
+          <li class="cart-item">
+            <span>{{ item.productName }}</span>
+            <div class="quantity-controls">
+              <button (click)="decreaseQuantity(item.productId, item.quantity)">-</button>
+              <span>{{ item.quantity }}</span>
+              <button (click)="increaseQuantity(item.productId, item.quantity)">+</button>
+            </div>
+            <span>{{ item.totalPrice }} RSD</span>
+            <button (click)="removeItem(item.productId)">Ukloni</button>
+          </li>
+        }
+      </ul>
+
+      <p class="cart-total"><strong>Ukupno: {{ c.totalPrice }} RSD</strong></p>
+      <button (click)="checkout()">Naruči</button>
+    }
+  }
+</div>

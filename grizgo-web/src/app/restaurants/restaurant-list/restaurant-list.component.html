@@ -1,0 +1,18 @@
+<div class="restaurant-list-container">
+  <h2>Restorani</h2>
+
+  @if (loading()) {
+    <p>Učitavanje...</p>
+  }
+
+  <div class="restaurant-grid">
+    @for (restaurant of restaurants(); track restaurant.id) {
+      <div class="restaurant-card">
+        <h3>{{ restaurant.nameSr }}</h3>
+        <p>{{ restaurant.cuisineType }}</p>
+        <p>{{ restaurant.address }}</p>
+        <p>{{ restaurant.descriptionSr }}</p>
+      </div>
+    }
+  </div>
+</div>
