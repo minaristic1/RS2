@@ -1,8 +1,8 @@
-﻿using System;
+﻿using RestaurantService.Domain.ValueObjects;
+using System;
 using System.Collections.Generic;
-using System.Text;
-
 using System.ComponentModel.DataAnnotations;
+using System.Text;
 
 
 namespace RestaurantService.Application.DTOs;
@@ -34,7 +34,5 @@ public class UpdateRestaurantRequest
     public bool IsActive { get; set; }
     public bool IsFeatured { get; set; }
 
-    [Required]
-    [StringLength(100)]
-    public string CuisineType { get; set; } = string.Empty;
+    public CuisineType CuisineType { get; set; }
 }

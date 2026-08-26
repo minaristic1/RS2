@@ -28,9 +28,6 @@ namespace RestaurantService.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasMaxLength(300);
 
-            builder.Property(restaurant => restaurant.CuisineType)
-                .HasMaxLength(100);
-
             builder.HasMany(restaurant => restaurant.Menus)
                 .WithOne(menu => menu.Restaurant)
                 .HasForeignKey(menu => menu.RestaurantId)

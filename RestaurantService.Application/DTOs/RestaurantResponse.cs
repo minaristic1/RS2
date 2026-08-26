@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using RestaurantService.Domain.ValueObjects;
+
 namespace RestaurantService.Application.DTOs;
 
 public class RestaurantResponse
@@ -24,7 +26,7 @@ public class RestaurantResponse
 
     public bool IsFeatured { get; set; }
 
-    public string CuisineType { get; set; } = string.Empty;
+    public CuisineType CuisineType { get; set; }
 
     public bool IsOpenNow { get; set; }
 }

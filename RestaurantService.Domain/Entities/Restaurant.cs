@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
+using RestaurantService.Domain.ValueObjects;
+
 namespace RestaurantService.Domain.Entities
 {
     public class Restaurant
@@ -21,7 +23,7 @@ namespace RestaurantService.Domain.Entities
 
         public string ImageUrl { get; set; } = string.Empty;
 
-        public string CuisineType { get; set; } = string.Empty;
+        public CuisineType CuisineType { get; set; }
 
         public bool IsActive { get; set; } = true;
 

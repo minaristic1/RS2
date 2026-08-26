@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 using System.ComponentModel.DataAnnotations;
+using RestaurantService.Domain.ValueObjects;
 
 namespace RestaurantService.Application.DTOs;
 
@@ -32,7 +33,5 @@ public class CreateRestaurantRequest
 
     public bool IsFeatured { get; set; }
 
-    [Required]
-    [StringLength(100)]
-    public string CuisineType { get; set; } = string.Empty;
+    public CuisineType CuisineType { get; set; }
 }
