@@ -56,6 +56,24 @@ public class RestaurantAppService : IRestaurantAppService
         };
     }
 
+    public async Task<RestaurantMenuListResponse?> GetRestaurantMenuAsync(Guid restaurantId)
+    {
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return null;
+        }
+
+        var menus = await _repository.GetMenusByRestaurantIdAsync(restaurantId);
+
+        return new RestaurantMenuListResponse
+        {
+            RestaurantId = restaurantId,
+            Menus = menus.Select(MapToMenuSummary).ToList()
+        };
+    }
+
     public async Task<RestaurantResponse> CreateAsync(CreateRestaurantRequest request)
     {
         var restaurant = new Restaurant
@@ -132,6 +150,40 @@ public class RestaurantAppService : IRestaurantAppService
             IsActive = restaurant.IsActive,
             IsFeatured = restaurant.IsFeatured,
             CuisineType = restaurant.CuisineType
+        };
+    }
+
+    private static MenuSummaryResponse MapToMenuSummary(Menu menu)
+    {
+        return new MenuSummaryResponse
+        {
+            MenuId = menu.Id,
+            NameSr = menu.NameSr,
+            Categories = menu.Categories.Select(MapToCategoryResponse).ToList()
+        };
+    }
+
+    private static MenuCategoryInMenuResponse MapToCategoryResponse(MenuCategory category)
+    {
+        return new MenuCategoryInMenuResponse
+        {
+            Id = category.Id,
+            NameSr = category.NameSr,
+            DisplayOrder = category.DisplayOrder,
+            Items = category.Items.Select(MapToItemSummary).ToList()
+        };
+    }
+
+    private static MenuItemSummaryResponse MapToItemSummary(MenuItem item)
+    {
+        return new MenuItemSummaryResponse
+        {
+            Id = item.Id,
+            NameSr = item.NameSr,
+            DescriptionSr = item.DescriptionSr,
+            Price = item.Price,
+            ImageUrl = item.ImageUrl,
+            IsAvailable = item.IsAvailable
         };
     }
 }

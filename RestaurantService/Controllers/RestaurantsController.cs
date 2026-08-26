@@ -40,6 +40,19 @@ public class RestaurantsController : ControllerBase
         return Ok(restaurant);
     }
 
+    [HttpGet("{restaurantId:guid}/menu")]
+    public async Task<ActionResult<RestaurantMenuListResponse>> GetMenu(Guid restaurantId)
+    {
+        var menu = await _restaurantAppService.GetRestaurantMenuAsync(restaurantId);
+
+        if (menu is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(menu);
+    }
+
     [HttpGet("search")]
     public async Task<ActionResult<List<RestaurantResponse>>> Search([FromQuery] string term)
     {

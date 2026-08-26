@@ -16,6 +16,8 @@ public interface IRestaurantAppService
 
     Task<MenuItemLookupResponse?> GetMenuItemByIdAsync(Guid id);
 
+    Task<RestaurantMenuListResponse?> GetRestaurantMenuAsync(Guid restaurantId);
+
     Task<List<RestaurantResponse>> SearchByNameAsync(string searchTerm);
 
     Task<RestaurantResponse> CreateAsync(CreateRestaurantRequest request);

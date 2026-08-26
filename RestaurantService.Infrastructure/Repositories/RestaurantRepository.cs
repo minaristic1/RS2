@@ -38,6 +38,19 @@ public class RestaurantRepository : IRestaurantRepository
             .FirstOrDefaultAsync(menuItem => menuItem.Id == id);
     }
 
+    public async Task<List<Menu>> GetMenusByRestaurantIdAsync(Guid restaurantId)
+    {
+        return await _context.Menus
+            .AsNoTracking()
+            .Where(menu => menu.RestaurantId == restaurantId && menu.IsActive)
+            .OrderBy(menu => menu.DisplayOrder)
+            .Include(menu => menu.Categories
+                .Where(category => category.IsActive)
+                .OrderBy(category => category.DisplayOrder))
+            .ThenInclude(category => category.Items)
+            .ToListAsync();
+    }
+
     public async Task<List<Restaurant>> SearchByNameAsync(string searchTerm)
     {
         return await _context.Restaurants
