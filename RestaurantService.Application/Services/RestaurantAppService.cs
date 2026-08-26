@@ -149,7 +149,8 @@ public class RestaurantAppService : IRestaurantAppService
             ImageUrl = restaurant.ImageUrl,
             IsActive = restaurant.IsActive,
             IsFeatured = restaurant.IsFeatured,
-            CuisineType = restaurant.CuisineType
+            CuisineType = restaurant.CuisineType,
+            IsOpenNow = restaurant.IsOpenNow(DateTime.Now)
         };
     }
 

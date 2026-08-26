@@ -22,12 +22,14 @@ public class RestaurantRepository : IRestaurantRepository
     {
         return await _context.Restaurants
             .AsNoTracking()
+            .Include(restaurant => restaurant.OpeningHours)
             .ToListAsync();
     }
 
     public async Task<Restaurant?> GetByIdAsync(Guid id)
     {
         return await _context.Restaurants
+            .Include(restaurant => restaurant.OpeningHours)
             .FirstOrDefaultAsync(restaurant => restaurant.Id == id);
     }
 
@@ -55,6 +57,7 @@ public class RestaurantRepository : IRestaurantRepository
     {
         return await _context.Restaurants
             .AsNoTracking()
+            .Include(restaurant => restaurant.OpeningHours)
             .Where(restaurant =>
                 restaurant.NameSr.Contains(searchTerm) ||
                 restaurant.NameEn.Contains(searchTerm))

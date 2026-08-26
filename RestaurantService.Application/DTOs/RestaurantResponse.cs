@@ -25,4 +25,6 @@ public class RestaurantResponse
     public bool IsFeatured { get; set; }
 
     public string CuisineType { get; set; } = string.Empty;
+
+    public bool IsOpenNow { get; set; }
 }
