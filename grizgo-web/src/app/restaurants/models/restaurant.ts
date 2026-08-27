@@ -9,4 +9,5 @@ export interface Restaurant {
   isActive: boolean;
   isFeatured: boolean;
   cuisineType: string;
+  isOpenNow: boolean;
 }

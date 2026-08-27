@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Restaurant } from '../models/restaurant';
+import { RestaurantMenuList } from '../models/menu';
 
 @Injectable({ providedIn: 'root' })
 export class RestaurantService {
@@ -11,5 +12,13 @@ export class RestaurantService {
 
   getAll(): Observable<Restaurant[]> {
     return this.http.get<Restaurant[]>(this.baseUrl);
+  }
+
+  getById(id: string): Observable<Restaurant> {
+    return this.http.get<Restaurant>(`${this.baseUrl}/${id}`);
+  }
+
+  getMenu(id: string): Observable<RestaurantMenuList> {
+    return this.http.get<RestaurantMenuList>(`${this.baseUrl}/${id}/menu`);
   }
 }

@@ -1,6 +1,13 @@
-<nav>
-  <a routerLink="/restaurants">Restorani</a>
-  <a routerLink="/cart">Korpa</a>
-  <a routerLink="/track">Prati dostavu</a>
+<nav class="navbar navbar-expand navbar-dark bg-primary px-3">
+  <a class="navbar-brand" routerLink="/restaurants">GrizGo</a>
+  <div class="navbar-nav">
+    <a class="nav-link" routerLink="/restaurants" routerLinkActive="active">Restorani</a>
+    <a class="nav-link" routerLink="/cart" routerLinkActive="active">Korpa</a>
+    <a class="nav-link" routerLink="/track" routerLinkActive="active">Prati dostavu</a>
+  </div>
+  <span class="badge bg-light text-dark ms-auto">Gost #{{ guestIdShort }}</span>
 </nav>
-<router-outlet></router-outlet>
+
+<div class="container py-4">
+  <router-outlet></router-outlet>
+</div>

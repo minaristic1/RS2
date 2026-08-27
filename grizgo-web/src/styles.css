@@ -1,1 +1,49 @@
 /* You can add global styles to this file, and also import other style files */
+
+:root {
+  --bs-primary: #1B4332;
+  --bs-primary-rgb: 27, 67, 50;
+  --bs-primary-text-emphasis: #1B4332;
+  --bs-primary-bg-subtle: #FAF3E0;
+  --bs-primary-border-subtle: #1B4332;
+  --bs-link-color: #1B4332;
+  --bs-link-color-rgb: 27, 67, 50;
+  --bs-link-hover-color: #143728;
+  --bs-link-hover-color-rgb: 20, 55, 40;
+}
+
+body {
+  background-color: #FAF3E0;
+}
+
+.btn-primary {
+  --bs-btn-bg: #1B4332;
+  --bs-btn-border-color: #1B4332;
+  --bs-btn-hover-bg: #143728;
+  --bs-btn-hover-border-color: #10331f;
+  --bs-btn-active-bg: #10331f;
+  --bs-btn-active-border-color: #0d2a19;
+  --bs-btn-disabled-bg: #1B4332;
+  --bs-btn-disabled-border-color: #1B4332;
+}
+
+.btn-accent {
+  background-color: #E9C46A;
+  border-color: #E9C46A;
+  color: #1B4332;
+  font-weight: 600;
+}
+
+.btn-accent:hover {
+  background-color: #dbb455;
+  border-color: #dbb455;
+  color: #1B4332;
+}
+
+.bg-primary {
+  background-color: #1B4332 !important;
+}
+
+.text-primary {
+  color: #1B4332 !important;
+}

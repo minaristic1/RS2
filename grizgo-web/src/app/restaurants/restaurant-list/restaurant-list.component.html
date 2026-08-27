@@ -1,17 +1,33 @@
 <div class="restaurant-list-container">
-  <h2>Restorani</h2>
+  <h2 class="mb-3">Restorani</h2>
 
   @if (loading()) {
     <p>Učitavanje...</p>
   }
 
-  <div class="restaurant-grid">
+  <div class="row g-3">
     @for (restaurant of restaurants(); track restaurant.id) {
-      <div class="restaurant-card">
-        <h3>{{ restaurant.nameSr }}</h3>
-        <p>{{ restaurant.cuisineType }}</p>
-        <p>{{ restaurant.address }}</p>
-        <p>{{ restaurant.descriptionSr }}</p>
+      <div class="col-12 col-sm-6 col-lg-4">
+        <a [routerLink]="['/restaurants', restaurant.id]" class="text-decoration-none text-body">
+          <div class="card h-100">
+            @if (restaurant.imageUrl) {
+              <img [src]="restaurant.imageUrl" class="card-img-top" [alt]="restaurant.nameSr" style="height: 160px; object-fit: cover;">
+            }
+            <div class="card-body">
+              <h3 class="card-title h5">{{ restaurant.nameSr }}</h3>
+              <span class="badge bg-primary mb-2">{{ restaurant.cuisineType }}</span>
+              <p class="card-text text-muted mb-1">
+                {{ restaurant.address }}
+                @if (restaurant.isOpenNow) {
+                  <span class="badge bg-success ms-1">Otvoreno</span>
+                } @else {
+                  <span class="badge bg-secondary ms-1">Zatvoreno</span>
+                }
+              </p>
+              <p class="card-text">{{ restaurant.descriptionSr }}</p>
+            </div>
+          </div>
+        </a>
       </div>
     }
   </div>

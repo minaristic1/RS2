@@ -1,9 +1,9 @@
 <div class="tracking-container">
-  <h2>Prati svoju porudžbinu</h2>
+  <h2 class="mb-3">Prati svoju porudžbinu</h2>
 
-  <div class="search-box">
-    <input [(ngModel)]="orderId" placeholder="Unesi Order ID" />
-    <button (click)="search()">Pretraži</button>
+  <div class="input-group mb-3" style="max-width: 480px;">
+    <input class="form-control" [(ngModel)]="orderId" placeholder="Unesi Order ID" />
+    <button class="btn btn-primary" (click)="search()">Pretraži</button>
   </div>
 
   @if (loading()) {
@@ -11,21 +11,23 @@
   }
 
   @if (notFound()) {
-    <p class="error">Porudžbina nije pronađena.</p>
+    <div class="alert alert-danger" style="max-width: 480px;">Porudžbina nije pronađena.</div>
   }
 
   @if (delivery(); as d) {
-    <div class="delivery-card">
-      <p><strong>Status:</strong> {{ statusLabel(d.status) }}</p>
-      <p><strong>Restoran:</strong> {{ d.restaurantName }}</p>
-      <p><strong>Adresa dostave:</strong> {{ d.deliveryAddress }}</p>
-      <p><strong>Ukupno:</strong> {{ d.totalPrice }} RSD</p>
-      <h3>Stavke:</h3>
-      <ul>
-        @for (item of d.items; track item.id) {
-          <li>{{ item.productName }} x{{ item.quantity }} - {{ item.unitPrice }} RSD</li>
-        }
-      </ul>
+    <div class="card" style="max-width: 480px;">
+      <div class="card-body">
+        <p><strong>Status:</strong> {{ statusLabel(d.status) }}</p>
+        <p><strong>Restoran:</strong> {{ d.restaurantName }}</p>
+        <p><strong>Adresa dostave:</strong> {{ d.deliveryAddress }}</p>
+        <p><strong>Ukupno:</strong> {{ d.totalPrice }} RSD</p>
+        <h3 class="h5">Stavke:</h3>
+        <ul class="list-group list-group-flush">
+          @for (item of d.items; track item.id) {
+            <li class="list-group-item">{{ item.productName }} x{{ item.quantity }} - {{ item.unitPrice }} RSD</li>
+          }
+        </ul>
+      </div>
     </div>
   }
 </div>
