@@ -183,6 +183,26 @@
         "PeriodTimespan": 10,
         "Limit": 20
       }
+    },
+    {
+      "DownstreamPathTemplate": "/api/restaurants/{id}/menu",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5056
+        }
+      ],
+      "UpstreamPathTemplate": "/api/restaurants/{id}/menu",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
     }
   ],
 
