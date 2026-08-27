@@ -23,6 +23,7 @@ public class RestaurantRepository : IRestaurantRepository
         return await _context.Restaurants
             .AsNoTracking()
             .Include(restaurant => restaurant.OpeningHours)
+            .Include(restaurant => restaurant.HolidayExceptions)
             .ToListAsync();
     }
 
@@ -30,6 +31,7 @@ public class RestaurantRepository : IRestaurantRepository
     {
         return await _context.Restaurants
             .Include(restaurant => restaurant.OpeningHours)
+            .Include(restaurant => restaurant.HolidayExceptions)
             .FirstOrDefaultAsync(restaurant => restaurant.Id == id);
     }
 
@@ -58,6 +60,7 @@ public class RestaurantRepository : IRestaurantRepository
         return await _context.Restaurants
             .AsNoTracking()
             .Include(restaurant => restaurant.OpeningHours)
+            .Include(restaurant => restaurant.HolidayExceptions)
             .Where(restaurant =>
                 restaurant.NameSr.Contains(searchTerm) ||
                 restaurant.NameEn.Contains(searchTerm))

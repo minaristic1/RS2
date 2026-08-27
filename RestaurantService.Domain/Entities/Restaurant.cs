@@ -35,8 +35,24 @@ namespace RestaurantService.Domain.Entities
 
         public List<RestaurantOpeningHours> OpeningHours { get; set; } = new();
 
+        public List<RestaurantHolidayException> HolidayExceptions { get; set; } = new();
+
         public bool IsOpenNow(DateTime referenceTime)
         {
+            var date = DateOnly.FromDateTime(referenceTime);
+            var holidayException = HolidayExceptions.FirstOrDefault(exception => exception.Date == date);
+
+            if (holidayException is not null)
+            {
+                if (holidayException.IsClosed || holidayException.OpenTime is null || holidayException.CloseTime is null)
+                {
+                    return false;
+                }
+
+                var currentTimeOnHoliday = referenceTime.TimeOfDay;
+                return currentTimeOnHoliday >= holidayException.OpenTime && currentTimeOnHoliday < holidayException.CloseTime;
+            }
+
             var todayHours = OpeningHours.FirstOrDefault(hours => hours.DayOfWeek == referenceTime.DayOfWeek);
 
             if (todayHours is null || todayHours.IsClosed)

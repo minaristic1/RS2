@@ -95,4 +95,64 @@ public class RestaurantTests
 
         Assert.False(result);
     }
+
+    [Fact]
+    public void IsOpenNow_WhenHolidayExceptionMarkedClosed_ReturnsFalse()
+    {
+        var restaurant = CreateRestaurantWithWednesdayHours(TimeSpan.FromHours(10), TimeSpan.FromHours(22));
+        var holidayDate = new DateOnly(2026, 1, 7); // Bozic, sreda
+
+        restaurant.HolidayExceptions.Add(new RestaurantHolidayException
+        {
+            Date = holidayDate,
+            IsClosed = true,
+            Reason = "Bozic"
+        });
+
+        var referenceTime = new DateTime(2026, 1, 7, 14, 30, 0); // isto vreme kad bi inace bilo otvoreno
+
+        var result = restaurant.IsOpenNow(referenceTime);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void IsOpenNow_WhenHolidayExceptionHasShortenedHours_UsesHolidayHoursInsteadOfWeeklyHours()
+    {
+        var restaurant = CreateRestaurantWithWednesdayHours(TimeSpan.FromHours(10), TimeSpan.FromHours(22));
+        var holidayDate = new DateOnly(2026, 1, 7); // npr. Badnji dan, skraceno
+
+        restaurant.HolidayExceptions.Add(new RestaurantHolidayException
+        {
+            Date = holidayDate,
+            IsClosed = false,
+            OpenTime = TimeSpan.FromHours(10),
+            CloseTime = TimeSpan.FromHours(15)
+        });
+
+        var withinHolidayHours = restaurant.IsOpenNow(new DateTime(2026, 1, 7, 14, 0, 0));
+        var afterHolidayHoursButWithinNormalHours = restaurant.IsOpenNow(new DateTime(2026, 1, 7, 16, 0, 0));
+
+        Assert.True(withinHolidayHours);
+        Assert.False(afterHolidayHoursButWithinNormalHours);
+    }
+
+    [Fact]
+    public void IsOpenNow_WhenHolidayExceptionExistsForDifferentDate_FallsBackToWeeklyHours()
+    {
+        var restaurant = CreateRestaurantWithWednesdayHours(TimeSpan.FromHours(10), TimeSpan.FromHours(22));
+
+        restaurant.HolidayExceptions.Add(new RestaurantHolidayException
+        {
+            Date = new DateOnly(2026, 1, 7),
+            IsClosed = true,
+            Reason = "Bozic"
+        });
+
+        var referenceTime = new DateTime(2026, 1, 14, 14, 30, 0); // naredna sreda, bez izuzetka
+
+        var result = restaurant.IsOpenNow(referenceTime);
+
+        Assert.True(result);
+    }
 }

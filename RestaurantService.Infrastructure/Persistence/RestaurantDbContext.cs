@@ -27,6 +27,8 @@ public class RestaurantDbContext : DbContext
 
     public DbSet<RestaurantOpeningHours> RestaurantOpeningHours => Set<RestaurantOpeningHours>();
 
+    public DbSet<RestaurantHolidayException> RestaurantHolidayExceptions => Set<RestaurantHolidayException>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
