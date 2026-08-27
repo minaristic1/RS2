@@ -155,7 +155,8 @@
       ],
       "UpstreamPathTemplate": "/api/restaurants",
       "UpstreamHttpMethod": [
-        "GET"
+        "GET",
+        "POST"
       ],
       "RateLimitOptions": {
         "EnableRateLimiting": true,
@@ -175,7 +176,9 @@
       ],
       "UpstreamPathTemplate": "/api/restaurants/{id}",
       "UpstreamHttpMethod": [
-        "GET"
+        "GET",
+        "PUT",
+        "DELETE"
       ],
       "RateLimitOptions": {
         "EnableRateLimiting": true,
@@ -194,6 +197,26 @@
         }
       ],
       "UpstreamPathTemplate": "/api/restaurants/{id}/menu",
+      "UpstreamHttpMethod": [
+        "GET"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/restaurants/search",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5056
+        }
+      ],
+      "UpstreamPathTemplate": "/api/restaurants/search",
       "UpstreamHttpMethod": [
         "GET"
       ],
