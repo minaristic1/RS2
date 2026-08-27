@@ -2,5 +2,6 @@
   <Project Path="../RestaurantService.Application/RestaurantService.Application.csproj" Id="e3454320-5db3-4ae9-ba91-a07e66048799" />
   <Project Path="../RestaurantService.Domain/RestaurantService.Domain.csproj" Id="c08bdad8-8c2f-4b3f-b348-0c42c2f07131" />
   <Project Path="../RestaurantService.Infrastructure/RestaurantService.Infrastructure.csproj" Id="6ba88988-2677-4504-ab30-96c6d2496369" />
+  <Project Path="../RestaurantService.Tests/RestaurantService.Tests.csproj" Id="974c539e-30ba-40ef-8163-cc50a47dc469" />
   <Project Path="RestaurantService.csproj" />
 </Solution>
