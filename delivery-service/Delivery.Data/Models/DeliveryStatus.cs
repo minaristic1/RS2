@@ -5,7 +5,8 @@ namespace Delivery.Data.Models
     {
         Created,
         Confirmed,
-        Preparing, 
+        Preparing,
+        ReadyForPickup,
         OutForDelivery,
         Delivered,
         Cancelled
