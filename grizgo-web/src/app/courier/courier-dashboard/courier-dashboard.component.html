@@ -1,0 +1,80 @@
+<div class="courier-container">
+  <h2 class="mb-3">Dostavljač</h2>
+
+  @if (loading()) {
+    <p>Učitavanje...</p>
+  }
+
+  <h3 class="h5 mt-4">Dostupne dostave</h3>
+  @if (availableDeliveries().length === 0) {
+    <p class="text-muted">Trenutno nema dostupnih dostava.</p>
+  } @else {
+    <div class="row g-3 mb-4">
+      @for (d of availableDeliveries(); track d.id) {
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h4 class="h6 mb-0">{{ d.restaurantName }}</h4>
+                <span class="badge" [ngClass]="statusBadgeClass(d.status)">{{ statusLabel(d.status) }}</span>
+              </div>
+
+              <p class="mb-1 small"><strong>Preuzimanje:</strong> {{ d.pickupAddress }}</p>
+              <p class="mb-1 small"><strong>Dostava:</strong> {{ d.deliveryAddress }}</p>
+              <p class="mb-2 small text-muted">{{ formatTime(d.createdAt) }} · {{ d.totalPrice }} RSD</p>
+
+              <button class="btn btn-primary btn-sm w-100" (click)="takeDelivery(d.id)">Preuzmi dostavu</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <h3 class="h5">Moje dostave</h3>
+  @if (myDeliveries().length === 0) {
+    <p class="text-muted">Nemaš aktivnih dostava.</p>
+  } @else {
+    <div class="row g-3">
+      @for (d of myDeliveries(); track d.id) {
+        <div class="col-12 col-lg-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h4 class="h6 mb-0">{{ d.restaurantName }}</h4>
+                <span class="badge" [ngClass]="statusBadgeClass(d.status)">{{ statusLabel(d.status) }}</span>
+              </div>
+
+              <div class="d-flex justify-content-between mb-3 status-steps">
+                @for (step of statusSteps; track step; let i = $index) {
+                  <div class="text-center flex-fill">
+                    <div class="step-dot" [class.step-dot-done]="d.status >= i"></div>
+                    <div class="step-label">{{ step }}</div>
+                  </div>
+                }
+              </div>
+
+              <p class="mb-1 small"><strong>Preuzimanje:</strong> {{ d.pickupAddress }}</p>
+              <p class="mb-1 small"><strong>Dostava:</strong> {{ d.deliveryAddress }}</p>
+              <p class="mb-1 small"><strong>Kupac:</strong> {{ d.customerName }} · {{ d.customerPhone }}</p>
+
+              <ul class="list-unstyled small mb-2">
+                @for (item of d.items; track item.id) {
+                  <li>{{ item.quantity }}x {{ item.productName }}</li>
+                }
+              </ul>
+
+              <p class="mb-2 small text-muted">{{ formatTime(d.createdAt) }} · {{ d.totalPrice }} RSD</p>
+
+              @if (canAct(d.status)) {
+                <button class="btn btn-accent btn-sm w-100" (click)="advanceStatus(d.id)">{{ actionLabel(d.status) }}</button>
+              } @else {
+                <p class="text-muted small mb-0 fst-italic">Čeka se da restoran završi pripremu...</p>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

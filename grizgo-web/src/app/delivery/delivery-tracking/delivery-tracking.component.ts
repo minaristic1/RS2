@@ -37,7 +37,7 @@ export class DeliveryTrackingComponent {
   }
 
   statusLabel(status: number): string {
-    const labels = ['Kreirana', 'Potvrđena', 'U pripremi', 'Na putu', 'Dostavljena', 'Otkazana'];
+    const labels = ['Kreirana', 'Potvrđena', 'U pripremi', 'Spremna za preuzimanje', 'Na putu', 'Dostavljena', 'Otkazana'];
     return labels[status] ?? 'Nepoznato';
   }
 }
