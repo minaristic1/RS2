@@ -1,5 +1,8 @@
-﻿namespace UserService.Domain.ValueObjects
+﻿using System.Text.Json.Serialization;
+
+namespace UserService.Domain.ValueObjects
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum UserRole
     {
         Customer = 1,

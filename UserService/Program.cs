@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using UserService.Infrastructure.Persistence;
+using UserService.Application.Interfaces;
+using UserService.Application.Services;
+using UserService.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +18,9 @@ var connectionString = builder.Configuration.GetConnectionString("UserDb")
 
 builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserAppService, UserAppService>();
 
 var app = builder.Build();
 
