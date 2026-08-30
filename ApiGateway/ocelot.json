@@ -308,6 +308,48 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/api/restaurants/{restaurantId}/menus/{menuId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5056
+        }
+      ],
+      "UpstreamPathTemplate": "/api/restaurants/{restaurantId}/menus/{menuId}",
+      "UpstreamHttpMethod": [
+        "PUT",
+        "DELETE"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/restaurants/{restaurantId}/menus/{menuId}/categories/{categoryId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5056
+        }
+      ],
+      "UpstreamPathTemplate": "/api/restaurants/{restaurantId}/menus/{menuId}/categories/{categoryId}",
+      "UpstreamHttpMethod": [
+        "PUT",
+        "DELETE"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
+    },
+    {
       "DownstreamPathTemplate": "/api/menu-items/{id}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

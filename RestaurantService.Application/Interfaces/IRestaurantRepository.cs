@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -43,4 +43,8 @@ public interface IRestaurantRepository
     Task AddMenuCategoryAsync(MenuCategory category);
 
     Task AddMenuItemAsync(MenuItem item);
+
+    Task DeleteMenuAsync(Guid menuId);
+
+    Task DeleteMenuCategoryAsync(Guid categoryId);
 }

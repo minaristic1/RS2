@@ -391,6 +391,160 @@ public class RestaurantAppService : IRestaurantAppService
         });
     }
 
+    public async Task<ServiceResult<MenuResponse>> UpdateMenuAsync(Guid restaurantId, Guid menuId, UpdateMenuRequest request, RequestingUser requestingUser)
+    {
+        var menu = await _repository.GetMenuByIdAsync(menuId);
+
+        if (menu is null || menu.RestaurantId != restaurantId)
+        {
+            return ServiceResult<MenuResponse>.NotFound();
+        }
+
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return ServiceResult<MenuResponse>.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult<MenuResponse>.Forbidden();
+        }
+
+        menu.NameSr = request.NameSr;
+        menu.NameEn = request.NameEn;
+        menu.DescriptionSr = request.DescriptionSr;
+        menu.DescriptionEn = request.DescriptionEn;
+        menu.DisplayOrder = request.DisplayOrder;
+        menu.IsActive = request.IsActive;
+
+        await _repository.SaveChangesAsync();
+
+        return ServiceResult<MenuResponse>.Success(new MenuResponse
+        {
+            Id = menu.Id,
+            RestaurantId = menu.RestaurantId,
+            NameSr = menu.NameSr,
+            NameEn = menu.NameEn,
+            DescriptionSr = menu.DescriptionSr,
+            DescriptionEn = menu.DescriptionEn,
+            DisplayOrder = menu.DisplayOrder,
+            IsActive = menu.IsActive
+        });
+    }
+
+    public async Task<ServiceResult> DeleteMenuAsync(Guid restaurantId, Guid menuId, RequestingUser requestingUser)
+    {
+        var menu = await _repository.GetMenuByIdAsync(menuId);
+
+        if (menu is null || menu.RestaurantId != restaurantId)
+        {
+            return ServiceResult.NotFound();
+        }
+
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return ServiceResult.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult.Forbidden();
+        }
+
+        await _repository.DeleteMenuAsync(menuId);
+        await _repository.SaveChangesAsync();
+
+        return ServiceResult.Success();
+    }
+
+    public async Task<ServiceResult<MenuCategoryResponse>> UpdateMenuCategoryAsync(Guid restaurantId, Guid menuId, Guid categoryId, UpdateMenuCategoryRequest request, RequestingUser requestingUser)
+    {
+        var category = await _repository.GetMenuCategoryByIdAsync(categoryId);
+
+        if (category is null || category.MenuId != menuId)
+        {
+            return ServiceResult<MenuCategoryResponse>.NotFound();
+        }
+
+        var menu = await _repository.GetMenuByIdAsync(menuId);
+
+        if (menu is null || menu.RestaurantId != restaurantId)
+        {
+            return ServiceResult<MenuCategoryResponse>.NotFound();
+        }
+
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return ServiceResult<MenuCategoryResponse>.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult<MenuCategoryResponse>.Forbidden();
+        }
+
+        category.NameSr = request.NameSr;
+        category.NameEn = request.NameEn;
+        category.DescriptionSr = request.DescriptionSr;
+        category.DescriptionEn = request.DescriptionEn;
+        category.DisplayOrder = request.DisplayOrder;
+        category.IsActive = request.IsActive;
+
+        await _repository.SaveChangesAsync();
+
+        return ServiceResult<MenuCategoryResponse>.Success(new MenuCategoryResponse
+        {
+            Id = category.Id,
+            MenuId = category.MenuId,
+            NameSr = category.NameSr,
+            NameEn = category.NameEn,
+            DescriptionSr = category.DescriptionSr,
+            DescriptionEn = category.DescriptionEn,
+            DisplayOrder = category.DisplayOrder,
+            IsActive = category.IsActive
+        });
+    }
+
+    public async Task<ServiceResult> DeleteMenuCategoryAsync(Guid restaurantId, Guid menuId, Guid categoryId, RequestingUser requestingUser)
+    {
+        var category = await _repository.GetMenuCategoryByIdAsync(categoryId);
+
+        if (category is null || category.MenuId != menuId)
+        {
+            return ServiceResult.NotFound();
+        }
+
+        var menu = await _repository.GetMenuByIdAsync(menuId);
+
+        if (menu is null || menu.RestaurantId != restaurantId)
+        {
+            return ServiceResult.NotFound();
+        }
+
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return ServiceResult.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult.Forbidden();
+        }
+
+        await _repository.DeleteMenuCategoryAsync(categoryId);
+        await _repository.SaveChangesAsync();
+
+        return ServiceResult.Success();
+    }
+
     private static RestaurantResponse MapToResponse(Restaurant restaurant)
     {
         return new RestaurantResponse

@@ -39,4 +39,12 @@ public interface IRestaurantAppService
     Task<ServiceResult<MenuCategoryResponse>> CreateMenuCategoryAsync(Guid restaurantId, Guid menuId, CreateMenuCategoryRequest request, RequestingUser requestingUser);
 
     Task<ServiceResult<MenuItemSummaryResponse>> CreateMenuItemAsync(Guid restaurantId, Guid menuId, Guid categoryId, CreateMenuItemRequest request, RequestingUser requestingUser);
+
+    Task<ServiceResult<MenuResponse>> UpdateMenuAsync(Guid restaurantId, Guid menuId, UpdateMenuRequest request, RequestingUser requestingUser);
+
+    Task<ServiceResult> DeleteMenuAsync(Guid restaurantId, Guid menuId, RequestingUser requestingUser);
+
+    Task<ServiceResult<MenuCategoryResponse>> UpdateMenuCategoryAsync(Guid restaurantId, Guid menuId, Guid categoryId, UpdateMenuCategoryRequest request, RequestingUser requestingUser);
+
+    Task<ServiceResult> DeleteMenuCategoryAsync(Guid restaurantId, Guid menuId, Guid categoryId, RequestingUser requestingUser);
 }

@@ -156,4 +156,60 @@ public class RestaurantsController : ControllerBase
             _ => StatusCode(StatusCodes.Status201Created, result.Value)
         };
     }
+
+    [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
+    [HttpPut("{restaurantId:guid}/menus/{menuId:guid}")]
+    public async Task<IActionResult> UpdateMenu(Guid restaurantId, Guid menuId, [FromBody] UpdateMenuRequest request)
+    {
+        var result = await _restaurantAppService.UpdateMenuAsync(restaurantId, menuId, request, User.ToRequestingUser());
+
+        return result.Status switch
+        {
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => NoContent()
+        };
+    }
+
+    [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
+    [HttpDelete("{restaurantId:guid}/menus/{menuId:guid}")]
+    public async Task<IActionResult> DeleteMenu(Guid restaurantId, Guid menuId)
+    {
+        var result = await _restaurantAppService.DeleteMenuAsync(restaurantId, menuId, User.ToRequestingUser());
+
+        return result.Status switch
+        {
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => NoContent()
+        };
+    }
+
+    [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
+    [HttpPut("{restaurantId:guid}/menus/{menuId:guid}/categories/{categoryId:guid}")]
+    public async Task<IActionResult> UpdateMenuCategory(Guid restaurantId, Guid menuId, Guid categoryId, [FromBody] UpdateMenuCategoryRequest request)
+    {
+        var result = await _restaurantAppService.UpdateMenuCategoryAsync(restaurantId, menuId, categoryId, request, User.ToRequestingUser());
+
+        return result.Status switch
+        {
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => NoContent()
+        };
+    }
+
+    [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
+    [HttpDelete("{restaurantId:guid}/menus/{menuId:guid}/categories/{categoryId:guid}")]
+    public async Task<IActionResult> DeleteMenuCategory(Guid restaurantId, Guid menuId, Guid categoryId)
+    {
+        var result = await _restaurantAppService.DeleteMenuCategoryAsync(restaurantId, menuId, categoryId, User.ToRequestingUser());
+
+        return result.Status switch
+        {
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => NoContent()
+        };
+    }
 }

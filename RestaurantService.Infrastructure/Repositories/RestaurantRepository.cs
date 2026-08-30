@@ -148,4 +148,24 @@ public class RestaurantRepository : IRestaurantRepository
     {
         await _context.MenuItems.AddAsync(item);
     }
+
+    public async Task DeleteMenuAsync(Guid menuId)
+    {
+        var menu = await _context.Menus.FindAsync(menuId);
+
+        if (menu is not null)
+        {
+            _context.Menus.Remove(menu);
+        }
+    }
+
+    public async Task DeleteMenuCategoryAsync(Guid categoryId)
+    {
+        var category = await _context.MenuCategories.FindAsync(categoryId);
+
+        if (category is not null)
+        {
+            _context.MenuCategories.Remove(category);
+        }
+    }
 }
