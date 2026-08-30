@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 using UserService.Application.DTOs;
 using UserService.Application.Interfaces;
@@ -22,6 +22,35 @@ public class UsersController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<UserResponse>> Register([FromBody] RegisterUserRequest request)
     {
+        if (request.Role != UserRole.Customer && request.Role != UserRole.Driver)
+        {
+            return BadRequest("Samostalna registracija je dozvoljena samo za role Customer ili Driver. RestaurantOwner i RestaurantEmployee naloge kreira Admin preko /api/users/admin/staff.");
+        }
+
+        var user = await _userAppService.RegisterAsync(request);
+
+        if (user is null)
+        {
+            return Conflict("Korisnik sa ovim email-om vec postoji.");
+        }
+
+        return StatusCode(StatusCodes.Status201Created, user);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("admin/staff")]
+    public async Task<ActionResult<UserResponse>> CreateStaff([FromBody] RegisterUserRequest request)
+    {
+        if (request.Role != UserRole.RestaurantOwner && request.Role != UserRole.RestaurantEmployee)
+        {
+            return BadRequest("Ovaj endpoint sluzi samo za kreiranje RestaurantOwner ili RestaurantEmployee naloga.");
+        }
+
+        if (request.Role == UserRole.RestaurantEmployee && request.RestaurantId is null)
+        {
+            return BadRequest("RestaurantId je obavezan za RestaurantEmployee nalog.");
+        }
+
         var user = await _userAppService.RegisterAsync(request);
 
         if (user is null)
