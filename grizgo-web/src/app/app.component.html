@@ -1,0 +1,30 @@
+<nav class="navbar navbar-expand navbar-dark bg-primary px-3">
+  <a class="navbar-brand" routerLink="/restaurants">GrizGo</a>
+  <div class="navbar-nav">
+    <a class="nav-link" routerLink="/restaurants" routerLinkActive="active">Restorani</a>
+    <a class="nav-link" routerLink="/cart" routerLinkActive="active">Korpa</a>
+    <a class="nav-link" routerLink="/track" routerLinkActive="active">Prati dostavu</a>
+    @if (currentUser()?.role === 'Driver' || currentUser()?.role === 'Admin') {
+      <a class="nav-link" routerLink="/courier" routerLinkActive="active">Dostavljač</a>
+    }
+    @if (currentUser()?.role === 'RestaurantOwner' || currentUser()?.role === 'RestaurantEmployee' || currentUser()?.role === 'Admin') {
+      <a class="nav-link" routerLink="/restaurant-orders" routerLinkActive="active">Porudžbine restorana</a>
+    }
+    <a class="nav-link" routerLink="/contact" routerLinkActive="active">Kontakt</a>
+    @if (currentUser()?.role === 'Admin') {
+      <a class="nav-link" routerLink="/admin/create-staff" routerLinkActive="active">Admin</a>
+    }
+  </div>
+  @if (currentUser(); as u) {
+    <span class="badge bg-light text-dark ms-auto me-2">{{ u.fullName }} ({{ u.role }})</span>
+    <button class="btn btn-outline-light btn-sm me-2" (click)="logout()">Odjavi se</button>
+  } @else {
+    <span class="badge bg-light text-dark ms-auto me-2">Gost #{{ guestIdShort }}</span>
+    <a routerLink="/login" class="btn btn-outline-light btn-sm me-2">Prijavi se</a>
+    <a routerLink="/register" class="btn btn-accent btn-sm">Registruj se</a>
+  }
+</nav>
+
+<div class="container py-4">
+  <router-outlet></router-outlet>
+</div>

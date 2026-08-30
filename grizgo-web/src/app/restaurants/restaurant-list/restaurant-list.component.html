@@ -1,0 +1,62 @@
+<div class="restaurant-list-container">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Restorani</h2>
+    @if (isAdmin()) {
+      <a routerLink="/restaurants/new" class="btn btn-outline-primary btn-sm">+ Dodaj restoran</a>
+    }
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-3">
+    <div class="input-group" style="max-width: 400px;">
+      <input
+        class="form-control"
+        placeholder="Pretraži restorane..."
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="search()"
+      />
+      <button class="btn btn-primary" (click)="search()">Pretraži</button>
+    </div>
+
+    <select class="form-select" style="max-width: 220px;" [(ngModel)]="selectedCuisine">
+      <option value="">Sve kuhinje</option>
+      @for (cuisine of cuisineOptions(); track cuisine) {
+        <option [value]="cuisine">{{ cuisine }}</option>
+      }
+    </select>
+  </div>
+
+  @if (loading()) {
+    <p>Učitavanje...</p>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">Trenutno ne možemo da učitamo restorane. Proveri da li je servis pokrenut.</div>
+  }
+
+  <div class="row g-3">
+    @for (restaurant of filteredRestaurants(); track restaurant.id) {
+      <div class="col-12 col-sm-6 col-lg-4">
+        <a [routerLink]="['/restaurants', restaurant.id]" class="text-decoration-none text-body">
+          <div class="card h-100">
+            @if (restaurant.imageUrl) {
+              <img [src]="restaurant.imageUrl" class="card-img-top" [alt]="restaurant.nameSr" style="height: 160px; object-fit: cover;">
+            }
+            <div class="card-body">
+              <h3 class="card-title h5">{{ restaurant.nameSr }}</h3>
+              <span class="badge bg-primary mb-2">{{ restaurant.cuisineType }}</span>
+              <p class="card-text text-muted mb-1">
+                {{ restaurant.address }}
+                @if (restaurant.isOpenNow) {
+                  <span class="badge bg-success ms-1">Otvoreno</span>
+                } @else {
+                  <span class="badge bg-secondary ms-1">Zatvoreno</span>
+                }
+              </p>
+              <p class="card-text">{{ restaurant.descriptionSr }}</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    }
+  </div>
+</div>

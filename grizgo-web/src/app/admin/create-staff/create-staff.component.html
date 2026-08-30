@@ -1,0 +1,56 @@
+<div class="create-staff-container">
+  <h2 class="mb-3">Admin — kreiraj nalog vlasnika/zaposlenog</h2>
+
+  <p class="text-muted small">
+    Prvo napravi restoran (ako već ne postoji) preko <a routerLink="/restaurants/new">"Dodaj restoran"</a>,
+    pa ovde dodeli nalog vlasniku/zaposlenom za taj restoran.
+  </p>
+
+  @if (success()) {
+    <div class="alert alert-success" style="max-width: 420px;">Nalog je uspešno kreiran.</div>
+  }
+
+  <form (ngSubmit)="submit()" style="max-width: 420px;">
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input class="form-control" type="email" [(ngModel)]="form.email" name="email" required />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Lozinka</label>
+      <input class="form-control" type="password" [(ngModel)]="form.password" name="password" required minlength="6" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Ime i prezime</label>
+      <input class="form-control" [(ngModel)]="form.fullName" name="fullName" required />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Uloga</label>
+      <select class="form-select" [(ngModel)]="form.role" name="role">
+        @for (r of roles; track r.value) {
+          <option [value]="r.value">{{ r.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Restoran</label>
+      <select class="form-select" [(ngModel)]="form.restaurantId" name="restaurantId" required>
+        <option value="" disabled>-- izaberi restoran --</option>
+        @for (r of restaurants(); track r.id) {
+          <option [value]="r.id">{{ r.nameSr }}</option>
+        }
+      </select>
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-danger">Došlo je do greške. Proveri da li si prijavljena kao Admin.</div>
+    }
+
+    <button type="submit" class="btn btn-primary" [disabled]="saving()">
+      {{ saving() ? 'Kreiranje...' : 'Kreiraj nalog' }}
+    </button>
+  </form>
+</div>

@@ -1,0 +1,79 @@
+<div class="restaurant-orders-container">
+  <h2 class="mb-3">Porudžbine restorana</h2>
+
+  @if (lockedToOwnRestaurant) {
+    <p class="text-muted mb-4">
+      Upravljaš restoranom: <strong>{{ selectedRestaurantName() }}</strong>
+    </p>
+  } @else {
+    <div class="mb-4" style="max-width: 360px;">
+      <label class="form-label">Ja sam:</label>
+      <select
+        class="form-select"
+        [ngModel]="selectedRestaurantId()"
+        (ngModelChange)="onRestaurantChange($event)"
+      >
+        <option value="">-- izaberi restoran --</option>
+        @for (r of restaurants(); track r.id) {
+          <option [value]="r.id">{{ r.nameSr }}</option>
+        }
+      </select>
+      <small class="text-muted">(privremeno, dok nalozi ne budu vezani za restoran)</small>
+    </div>
+  }
+
+  @if (selectedRestaurantId()) {
+    <div class="d-flex gap-2 mb-4">
+      <a [routerLink]="['/restaurants', selectedRestaurantId(), 'edit']" class="btn btn-outline-secondary btn-sm">Izmeni podatke restorana</a>
+      <a [routerLink]="['/restaurants', selectedRestaurantId(), 'menu-manage']" class="btn btn-outline-secondary btn-sm">Upravljaj menijem</a>
+    </div>
+  }
+
+  @if (loading()) {
+    <p>Učitavanje...</p>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">Trenutno ne možemo da učitamo podatke. Proveri da li su servisi pokrenuti.</div>
+  }
+
+  @if (actionError()) {
+    <div class="alert alert-danger">Nešto nije uspelo. Pokušaj ponovo.</div>
+  }
+
+  @if (!selectedRestaurantId()) {
+    <p class="text-muted">Izaberi restoran da vidiš njegove porudžbine.</p>
+  } @else if (incomingOrders().length === 0) {
+    <p class="text-muted">Nema novih porudžbina.</p>
+  } @else {
+    <div class="row g-3">
+      @for (d of incomingOrders(); track d.id) {
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h4 class="h6 mb-0">{{ d.customerName }}</h4>
+                <span class="badge bg-secondary">{{ statusLabel(d.status) }}</span>
+              </div>
+
+              <p class="mb-1 small"><strong>Dostava na:</strong> {{ d.deliveryAddress }}</p>
+
+              <ul class="list-unstyled small mb-2">
+                @for (item of d.items; track item.id) {
+                  <li>{{ item.quantity }}x {{ item.productName }}</li>
+                }
+              </ul>
+
+              <p class="mb-2 small text-muted">{{ formatTime(d.createdAt) }} · {{ d.totalPrice }} RSD</p>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-sm flex-fill" (click)="advanceStatus(d.id)">{{ actionLabel(d.status) }}</button>
+                <button class="btn btn-outline-danger btn-sm" (click)="cancel(d.id)">Otkaži</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
