@@ -1,0 +1,58 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+using RestaurantService.Domain.Entities;
+
+namespace RestaurantService.Application.Interfaces;
+
+public interface IRestaurantRepository
+{
+    Task<List<Restaurant>> GetAllAsync();
+
+    Task<Restaurant?> GetByIdAsync(Guid id);
+
+    Task<MenuItem?> GetMenuItemByIdAsync(Guid id);
+
+    Task<MenuItem?> GetTrackedMenuItemByIdAsync(Guid id);
+
+    Task DeleteMenuItemAsync(Guid id);
+
+    Task<List<Menu>> GetMenusByRestaurantIdAsync(Guid restaurantId);
+
+    Task<List<Restaurant>> SearchByNameAsync(string searchTerm);
+
+    Task AddAsync(Restaurant restaurant);
+
+    Task UpdateAsync(Restaurant restaurant);
+
+    Task DeleteAsync(Guid id);
+
+    Task SaveChangesAsync();
+
+    Task ReplaceOpeningHoursAsync(Guid restaurantId, List<RestaurantOpeningHours> newHours);
+
+    Task<bool> RestaurantExistsAsync(Guid restaurantId);
+
+    Task<Menu?> GetMenuByIdAsync(Guid menuId);
+
+    Task<MenuCategory?> GetMenuCategoryByIdAsync(Guid categoryId);
+
+    Task AddMenuAsync(Menu menu);
+
+    Task AddMenuCategoryAsync(MenuCategory category);
+
+    Task AddMenuItemAsync(MenuItem item);
+
+    Task DeleteMenuAsync(Guid menuId);
+
+    Task DeleteMenuCategoryAsync(Guid categoryId);
+
+    Task<List<RestaurantHolidayException>> GetHolidayExceptionsByRestaurantIdAsync(Guid restaurantId);
+
+    Task<RestaurantHolidayException?> GetHolidayExceptionByIdAsync(Guid id);
+
+    Task AddHolidayExceptionAsync(RestaurantHolidayException exception);
+
+    Task DeleteHolidayExceptionAsync(Guid id);
+}
