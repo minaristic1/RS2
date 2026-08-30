@@ -110,4 +110,46 @@ public class RestaurantsController : ControllerBase
 
         return NoContent();
     }
+
+    [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
+    [HttpPost("{restaurantId:guid}/menus")]
+    public async Task<ActionResult<MenuResponse>> CreateMenu(Guid restaurantId, [FromBody] CreateMenuRequest request)
+    {
+        var menu = await _restaurantAppService.CreateMenuAsync(restaurantId, request);
+
+        if (menu is null)
+        {
+            return NotFound();
+        }
+
+        return StatusCode(StatusCodes.Status201Created, menu);
+    }
+
+    [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
+    [HttpPost("{restaurantId:guid}/menus/{menuId:guid}/categories")]
+    public async Task<ActionResult<MenuCategoryResponse>> CreateMenuCategory(Guid restaurantId, Guid menuId, [FromBody] CreateMenuCategoryRequest request)
+    {
+        var category = await _restaurantAppService.CreateMenuCategoryAsync(restaurantId, menuId, request);
+
+        if (category is null)
+        {
+            return NotFound();
+        }
+
+        return StatusCode(StatusCodes.Status201Created, category);
+    }
+
+    [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
+    [HttpPost("{restaurantId:guid}/menus/{menuId:guid}/categories/{categoryId:guid}/items")]
+    public async Task<ActionResult<MenuItemSummaryResponse>> CreateMenuItem(Guid restaurantId, Guid menuId, Guid categoryId, [FromBody] CreateMenuItemRequest request)
+    {
+        var item = await _restaurantAppService.CreateMenuItemAsync(restaurantId, menuId, categoryId, request);
+
+        if (item is null)
+        {
+            return NotFound();
+        }
+
+        return StatusCode(StatusCodes.Status201Created, item);
+    }
 }

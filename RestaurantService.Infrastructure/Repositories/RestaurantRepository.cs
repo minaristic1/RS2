@@ -118,4 +118,34 @@ public class RestaurantRepository : IRestaurantRepository
         _context.RestaurantOpeningHours.RemoveRange(existing);
         await _context.RestaurantOpeningHours.AddRangeAsync(newHours);
     }
+
+    public async Task<bool> RestaurantExistsAsync(Guid restaurantId)
+    {
+        return await _context.Restaurants.AnyAsync(restaurant => restaurant.Id == restaurantId);
+    }
+
+    public async Task<Menu?> GetMenuByIdAsync(Guid menuId)
+    {
+        return await _context.Menus.FirstOrDefaultAsync(menu => menu.Id == menuId);
+    }
+
+    public async Task<MenuCategory?> GetMenuCategoryByIdAsync(Guid categoryId)
+    {
+        return await _context.MenuCategories.FirstOrDefaultAsync(category => category.Id == categoryId);
+    }
+
+    public async Task AddMenuAsync(Menu menu)
+    {
+        await _context.Menus.AddAsync(menu);
+    }
+
+    public async Task AddMenuCategoryAsync(MenuCategory category)
+    {
+        await _context.MenuCategories.AddAsync(category);
+    }
+
+    public async Task AddMenuItemAsync(MenuItem item)
+    {
+        await _context.MenuItems.AddAsync(item);
+    }
 }

@@ -31,4 +31,16 @@ public interface IRestaurantRepository
     Task SaveChangesAsync();
 
     Task ReplaceOpeningHoursAsync(Guid restaurantId, List<RestaurantOpeningHours> newHours);
+
+    Task<bool> RestaurantExistsAsync(Guid restaurantId);
+
+    Task<Menu?> GetMenuByIdAsync(Guid menuId);
+
+    Task<MenuCategory?> GetMenuCategoryByIdAsync(Guid categoryId);
+
+    Task AddMenuAsync(Menu menu);
+
+    Task AddMenuCategoryAsync(MenuCategory category);
+
+    Task AddMenuItemAsync(MenuItem item);
 }

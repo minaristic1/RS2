@@ -200,6 +200,126 @@ public class RestaurantAppService : IRestaurantAppService
         return true;
     }
 
+    public async Task<MenuResponse?> CreateMenuAsync(Guid restaurantId, CreateMenuRequest request)
+    {
+        var restaurantExists = await _repository.RestaurantExistsAsync(restaurantId);
+
+        if (!restaurantExists)
+        {
+            return null;
+        }
+
+        var menu = new Menu
+        {
+            Id = Guid.NewGuid(),
+            RestaurantId = restaurantId,
+            NameSr = request.NameSr,
+            NameEn = request.NameEn,
+            DescriptionSr = request.DescriptionSr,
+            DescriptionEn = request.DescriptionEn,
+            DisplayOrder = request.DisplayOrder,
+            IsActive = true
+        };
+
+        await _repository.AddMenuAsync(menu);
+        await _repository.SaveChangesAsync();
+
+        return new MenuResponse
+        {
+            Id = menu.Id,
+            RestaurantId = menu.RestaurantId,
+            NameSr = menu.NameSr,
+            NameEn = menu.NameEn,
+            DescriptionSr = menu.DescriptionSr,
+            DescriptionEn = menu.DescriptionEn,
+            DisplayOrder = menu.DisplayOrder,
+            IsActive = menu.IsActive
+        };
+    }
+
+    public async Task<MenuCategoryResponse?> CreateMenuCategoryAsync(Guid restaurantId, Guid menuId, CreateMenuCategoryRequest request)
+    {
+        var menu = await _repository.GetMenuByIdAsync(menuId);
+
+        if (menu is null || menu.RestaurantId != restaurantId)
+        {
+            return null;
+        }
+
+        var category = new MenuCategory
+        {
+            Id = Guid.NewGuid(),
+            MenuId = menuId,
+            NameSr = request.NameSr,
+            NameEn = request.NameEn,
+            DescriptionSr = request.DescriptionSr,
+            DescriptionEn = request.DescriptionEn,
+            DisplayOrder = request.DisplayOrder,
+            IsActive = true
+        };
+
+        await _repository.AddMenuCategoryAsync(category);
+        await _repository.SaveChangesAsync();
+
+        return new MenuCategoryResponse
+        {
+            Id = category.Id,
+            MenuId = category.MenuId,
+            NameSr = category.NameSr,
+            NameEn = category.NameEn,
+            DescriptionSr = category.DescriptionSr,
+            DescriptionEn = category.DescriptionEn,
+            DisplayOrder = category.DisplayOrder,
+            IsActive = category.IsActive
+        };
+    }
+
+    public async Task<MenuItemSummaryResponse?> CreateMenuItemAsync(Guid restaurantId, Guid menuId, Guid categoryId, CreateMenuItemRequest request)
+    {
+        var category = await _repository.GetMenuCategoryByIdAsync(categoryId);
+
+        if (category is null || category.MenuId != menuId)
+        {
+            return null;
+        }
+
+        var menu = await _repository.GetMenuByIdAsync(menuId);
+
+        if (menu is null || menu.RestaurantId != restaurantId)
+        {
+            return null;
+        }
+
+        var item = new MenuItem
+        {
+            Id = Guid.NewGuid(),
+            MenuCategoryId = categoryId,
+            RestaurantId = restaurantId,
+            NameSr = request.NameSr,
+            NameEn = request.NameEn,
+            DescriptionSr = request.DescriptionSr,
+            DescriptionEn = request.DescriptionEn,
+            Price = request.Price,
+            ImageUrl = request.ImageUrl,
+            IsAvailable = request.IsAvailable,
+            IsFeatured = request.IsFeatured,
+            PreparationTimeMinutes = request.PreparationTimeMinutes
+        };
+
+        await _repository.AddMenuItemAsync(item);
+        await _repository.SaveChangesAsync();
+
+        return new MenuItemSummaryResponse
+        {
+            Id = item.Id,
+            NameSr = item.NameSr,
+            DescriptionSr = item.DescriptionSr,
+            Price = item.Price,
+            ImageUrl = item.ImageUrl,
+            IsAvailable = item.IsAvailable
+        };
+    }
+
     private static RestaurantResponse MapToResponse(Restaurant restaurant)
     {
         return new RestaurantResponse

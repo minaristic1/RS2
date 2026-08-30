@@ -13,7 +13,24 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.OpenApiSecurityScheme
+    {
+        In = Microsoft.OpenApi.ParameterLocation.Header,
+        Description = "Unesi token (bez reci 'Bearer', on se automatski dodaje)",
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(document => new()
+    {
+        [new Microsoft.OpenApi.OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
+    });
+});
 
 var connectionString = builder.Configuration.GetConnectionString("UserDb")
     ?? throw new InvalidOperationException(
@@ -53,7 +70,10 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.EnablePersistAuthorization();
+    });
 }
 
 app.UseHttpsRedirection();
