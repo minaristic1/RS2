@@ -29,4 +29,6 @@ public interface IRestaurantAppService
     Task<bool> UpdateMenuItemAsync(Guid id, UpdateMenuItemRequest request);
 
     Task<bool> DeleteMenuItemAsync(Guid id);
+
+    Task<bool> SetOpeningHoursAsync(Guid restaurantId, List<OpeningHourEntryRequest> request);
 }

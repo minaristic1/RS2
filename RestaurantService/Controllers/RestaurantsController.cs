@@ -96,4 +96,18 @@ public class RestaurantsController : ControllerBase
 
         return NoContent();
     }
+
+    [Authorize(Roles = "RestaurantOwner,Admin")]
+    [HttpPut("{id:guid}/opening-hours")]
+    public async Task<IActionResult> SetOpeningHours(Guid id, [FromBody] List<OpeningHourEntryRequest> request)
+    {
+        var success = await _restaurantAppService.SetOpeningHoursAsync(id, request);
+
+        if (!success)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
 }

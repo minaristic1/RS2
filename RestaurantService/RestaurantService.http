@@ -90,3 +90,18 @@ Authorization: Bearer PASTE_OWNER_TOKEN_OVDE
   "isFeatured": false,
   "preparationTimeMinutes": 15
 }
+
+###
+
+PUT {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c/opening-hours
+Content-Type: application/json
+Authorization: Bearer PASTE_OWNER_TOKEN_OVDE
+[
+  { "dayOfWeek": 1, "openTime": "08:00", "closeTime": "22:00", "isClosed": false },
+  { "dayOfWeek": 2, "openTime": "08:00", "closeTime": "22:00", "isClosed": false },
+  { "dayOfWeek": 3, "openTime": "08:00", "closeTime": "22:00", "isClosed": false },
+  { "dayOfWeek": 4, "openTime": "08:00", "closeTime": "22:00", "isClosed": false },
+  { "dayOfWeek": 5, "openTime": "08:00", "closeTime": "23:00", "isClosed": false },
+  { "dayOfWeek": 6, "openTime": "10:00", "closeTime": "23:00", "isClosed": false },
+  { "dayOfWeek": 0, "openTime": "10:00", "closeTime": "20:00", "isClosed": false }
+]

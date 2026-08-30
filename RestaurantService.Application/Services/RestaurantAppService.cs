@@ -175,6 +175,31 @@ public class RestaurantAppService : IRestaurantAppService
         return true;
     }
 
+    public async Task<bool> SetOpeningHoursAsync(Guid restaurantId, List<OpeningHourEntryRequest> request)
+    {
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return false;
+        }
+
+        var newHours = request.Select(entry => new RestaurantOpeningHours
+        {
+            Id = Guid.NewGuid(),
+            RestaurantId = restaurantId,
+            DayOfWeek = entry.DayOfWeek,
+            OpenTime = TimeSpan.Parse(entry.OpenTime),
+            CloseTime = TimeSpan.Parse(entry.CloseTime),
+            IsClosed = entry.IsClosed
+        }).ToList();
+
+        await _repository.ReplaceOpeningHoursAsync(restaurantId, newHours);
+        await _repository.SaveChangesAsync();
+
+        return true;
+    }
+
     private static RestaurantResponse MapToResponse(Restaurant restaurant)
     {
         return new RestaurantResponse

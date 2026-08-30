@@ -29,4 +29,6 @@ public interface IRestaurantRepository
     Task DeleteAsync(Guid id);
 
     Task SaveChangesAsync();
+
+    Task ReplaceOpeningHoursAsync(Guid restaurantId, List<RestaurantOpeningHours> newHours);
 }

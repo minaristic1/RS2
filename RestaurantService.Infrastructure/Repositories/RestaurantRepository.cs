@@ -108,4 +108,14 @@ public class RestaurantRepository : IRestaurantRepository
     {
         await _context.SaveChangesAsync();
     }
+
+    public async Task ReplaceOpeningHoursAsync(Guid restaurantId, List<RestaurantOpeningHours> newHours)
+    {
+        var existing = await _context.RestaurantOpeningHours
+            .Where(openingHours => openingHours.RestaurantId == restaurantId)
+            .ToListAsync();
+
+        _context.RestaurantOpeningHours.RemoveRange(existing);
+        await _context.RestaurantOpeningHours.AddRangeAsync(newHours);
+    }
 }
