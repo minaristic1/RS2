@@ -14,5 +14,5 @@ public interface ICartService
     
     Task ClearCartAsync(Guid userId);
 
-    Task CheckoutAsync(Guid userId);
+    Task CheckoutAsync(Guid userId, CheckoutRequest request);
 }

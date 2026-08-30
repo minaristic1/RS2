@@ -143,20 +143,21 @@ public class CartManager : ICartService
         await _cartRepository.DeleteCartAsync(userId);
     }
     
-    public async Task CheckoutAsync(Guid userId)
+    public async Task CheckoutAsync(Guid userId, CheckoutRequest request)
     {
         var cart = await _cartRepository.GetCartAsync(userId);
- 
+
         if (cart is null || cart.Items.Count == 0)
         {
             throw new NotFoundException(
                 "Korpa ne postoji ili je prazna.");
         }
- 
+
         var checkoutEvent = new CartCheckedOutEvent
         {
             UserId = cart.UserId,
             RestaurantId = cart.Items.First().RestaurantId,
+            DeliveryAddress = request.DeliveryAddress,
             TotalPrice = cart.TotalPrice,
             CreatedAt = DateTime.UtcNow,
  

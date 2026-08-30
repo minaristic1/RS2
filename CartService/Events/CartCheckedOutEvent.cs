@@ -5,7 +5,9 @@ public class CartCheckedOutEvent
     public Guid UserId { get; set; }
  
     public Guid RestaurantId { get; set; }
- 
+
+    public string DeliveryAddress { get; set; } = string.Empty;
+
     public List<CartCheckedOutItem> Items { get; set; } = new();
  
     public decimal TotalPrice { get; set; }

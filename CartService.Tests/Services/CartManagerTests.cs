@@ -360,13 +360,15 @@ public class CartManagerTests
     public async Task CheckoutAsync_WhenCartDoesNotExist_ThrowsNotFoundException()
     {
         var userId = Guid.NewGuid();
- 
+
         _repositoryMock
             .Setup(repository => repository.GetCartAsync(userId))
             .ReturnsAsync((Cart?)null);
-        
+
+        var request = new CheckoutRequest { DeliveryAddress = "Ulica Slobode 5" };
+
         await Assert.ThrowsAsync<NotFoundException>(() =>
-            _cartManager.CheckoutAsync(userId));
+            _cartManager.CheckoutAsync(userId, request));
  
         _rabbitMqPublisherMock.Verify(
             publisher => publisher.PublishCartCheckedOutAsync(
@@ -392,9 +394,11 @@ public class CartManagerTests
         _repositoryMock
             .Setup(repository => repository.GetCartAsync(userId))
             .ReturnsAsync(cart);
-        
+
+        var request = new CheckoutRequest { DeliveryAddress = "Ulica Slobode 5" };
+
         await Assert.ThrowsAsync<NotFoundException>(() =>
-            _cartManager.CheckoutAsync(userId));
+            _cartManager.CheckoutAsync(userId, request));
  
         _rabbitMqPublisherMock.Verify(
             publisher => publisher.PublishCartCheckedOutAsync(
@@ -433,14 +437,17 @@ public class CartManagerTests
         _repositoryMock
             .Setup(repository => repository.GetCartAsync(userId))
             .ReturnsAsync(cart);
-        
-        await _cartManager.CheckoutAsync(userId);
-        
+
+        var request = new CheckoutRequest { DeliveryAddress = "Ulica Slobode 5" };
+
+        await _cartManager.CheckoutAsync(userId, request);
+
         _rabbitMqPublisherMock.Verify(
             publisher => publisher.PublishCartCheckedOutAsync(
                 It.Is<CartCheckedOutEvent>(message =>
                     message.UserId == userId &&
                     message.RestaurantId == restaurantId &&
+                    message.DeliveryAddress == "Ulica Slobode 5" &&
                     message.TotalPrice == 1700 &&
                     message.Items.Count == 1 &&
                     message.Items[0].ProductId == productId &&

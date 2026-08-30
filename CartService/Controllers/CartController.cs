@@ -55,10 +55,10 @@ public class CartController : ControllerBase
     }
     
     [HttpPost("{userId:guid}/checkout")]
-    public async Task<IActionResult> Checkout(Guid userId)
+    public async Task<IActionResult> Checkout(Guid userId, [FromBody] CheckoutRequest request)
     {
-        await _cartService.CheckoutAsync(userId);
- 
+        await _cartService.CheckoutAsync(userId, request);
+
         return Accepted();
     }
 }
