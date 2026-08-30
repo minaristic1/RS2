@@ -136,6 +136,45 @@ public class RestaurantAppService : IRestaurantAppService
         return true;
     }
 
+    public async Task<bool> UpdateMenuItemAsync(Guid id, UpdateMenuItemRequest request)
+    {
+        var menuItem = await _repository.GetTrackedMenuItemByIdAsync(id);
+
+        if (menuItem is null)
+        {
+            return false;
+        }
+
+        menuItem.NameSr = request.NameSr;
+        menuItem.NameEn = request.NameEn;
+        menuItem.DescriptionSr = request.DescriptionSr;
+        menuItem.DescriptionEn = request.DescriptionEn;
+        menuItem.Price = request.Price;
+        menuItem.ImageUrl = request.ImageUrl;
+        menuItem.IsAvailable = request.IsAvailable;
+        menuItem.IsFeatured = request.IsFeatured;
+        menuItem.PreparationTimeMinutes = request.PreparationTimeMinutes;
+
+        await _repository.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<bool> DeleteMenuItemAsync(Guid id)
+    {
+        var menuItem = await _repository.GetTrackedMenuItemByIdAsync(id);
+
+        if (menuItem is null)
+        {
+            return false;
+        }
+
+        await _repository.DeleteMenuItemAsync(id);
+        await _repository.SaveChangesAsync();
+
+        return true;
+    }
+
     private static RestaurantResponse MapToResponse(Restaurant restaurant)
     {
         return new RestaurantResponse

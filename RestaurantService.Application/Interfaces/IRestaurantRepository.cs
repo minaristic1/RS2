@@ -14,6 +14,10 @@ public interface IRestaurantRepository
 
     Task<MenuItem?> GetMenuItemByIdAsync(Guid id);
 
+    Task<MenuItem?> GetTrackedMenuItemByIdAsync(Guid id);
+
+    Task DeleteMenuItemAsync(Guid id);
+
     Task<List<Menu>> GetMenusByRestaurantIdAsync(Guid restaurantId);
 
     Task<List<Restaurant>> SearchByNameAsync(string searchTerm);

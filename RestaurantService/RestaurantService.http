@@ -55,3 +55,38 @@ Authorization: Bearer PASTE_OWNER_TOKEN_OVDE
   "isFeatured": false,
   "cuisineType": "Srpska"
 }
+
+###
+
+PUT {{RestaurantService_HostAddress}}/api/menu-items/bca22044-b380-44e3-aac1-797d705c655d
+Content-Type: application/json
+
+{
+  "nameSr": "Test Bez Tokena",
+  "nameEn": "Test No Token",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "price": 500,
+  "imageUrl": "https://example.com/img.jpg",
+  "isAvailable": false,
+  "isFeatured": false,
+  "preparationTimeMinutes": 15
+}
+
+###
+
+PUT {{RestaurantService_HostAddress}}/api/menu-items/bca22044-b380-44e3-aac1-797d705c655d
+Content-Type: application/json
+Authorization: Bearer PASTE_OWNER_TOKEN_OVDE
+
+{
+  "nameSr": "Test Vlasnik Menja Meni",
+  "nameEn": "Test Owner Updates Item",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "price": 500,
+  "imageUrl": "https://example.com/img.jpg",
+  "isAvailable": false,
+  "isFeatured": false,
+  "preparationTimeMinutes": 15
+}

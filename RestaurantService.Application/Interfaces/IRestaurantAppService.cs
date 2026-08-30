@@ -25,4 +25,8 @@ public interface IRestaurantAppService
     Task<bool> UpdateAsync(Guid id, UpdateRestaurantRequest request);
 
     Task<bool> DeleteAsync(Guid id);
+
+    Task<bool> UpdateMenuItemAsync(Guid id, UpdateMenuItemRequest request);
+
+    Task<bool> DeleteMenuItemAsync(Guid id);
 }

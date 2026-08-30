@@ -42,6 +42,22 @@ public class RestaurantRepository : IRestaurantRepository
             .FirstOrDefaultAsync(menuItem => menuItem.Id == id);
     }
 
+    public async Task<MenuItem?> GetTrackedMenuItemByIdAsync(Guid id)
+    {
+        return await _context.MenuItems
+            .FirstOrDefaultAsync(menuItem => menuItem.Id == id);
+    }
+
+    public async Task DeleteMenuItemAsync(Guid id)
+    {
+        var menuItem = await _context.MenuItems.FindAsync(id);
+
+        if (menuItem is not null)
+        {
+            _context.MenuItems.Remove(menuItem);
+        }
+    }
+
     public async Task<List<Menu>> GetMenusByRestaurantIdAsync(Guid restaurantId)
     {
         return await _context.Menus
