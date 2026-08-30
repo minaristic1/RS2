@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using RestaurantService.Application.Interfaces;
-using RestaurantService.Infrastructure.Persistence;
-using RestaurantService.Infrastructure.Repositories;
-using RestaurantService.Application.Services;
+using UserService.Infrastructure.Persistence;
+using UserService.Application.Interfaces;
+using UserService.Application.Services;
+using UserService.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 builder.Services.AddSwaggerGen(options =>
@@ -33,16 +32,15 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-var connectionString = builder.Configuration.GetConnectionString("RestaurantDb")
+var connectionString = builder.Configuration.GetConnectionString("UserDb")
     ?? throw new InvalidOperationException(
-        "Connection string 'RestaurantDb' is not configured.");
+        "Connection string 'UserDb' is not configured.");
 
-builder.Services.AddDbContext<RestaurantDbContext>(options =>
+builder.Services.AddDbContext<UserDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddScoped<IRestaurantRepository, RestaurantRepository>();
-
-builder.Services.AddScoped<IRestaurantAppService, RestaurantAppService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserAppService, UserAppService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 var jwtIssuer = builder.Configuration["Jwt:Issuer"]!;

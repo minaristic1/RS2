@@ -1,6 +1,153 @@
 @RestaurantService_HostAddress = http://localhost:5056
 
-GET {{RestaurantService_HostAddress}}/weatherforecast/
+GET {{RestaurantService_HostAddress}}/api/restaurants
 Accept: application/json
 
 ###
+
+PUT {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c
+Content-Type: application/json
+
+{
+  "nameSr": "Test Bez Tokena",
+  "nameEn": "Test No Token",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "address": "Test Adresa 1",
+  "imageUrl": "https://example.com/img.jpg",
+  "isActive": true,
+  "isFeatured": false,
+  "cuisineType": "Srpska"
+}
+
+###
+
+PUT {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c
+Content-Type: application/json
+Authorization: Bearer PASTE_CUSTOMER_TOKEN_OVDE
+
+{
+  "nameSr": "Test Pogresna Uloga",
+  "nameEn": "Test Wrong Role",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "address": "Test Adresa 1",
+  "imageUrl": "https://example.com/img.jpg",
+  "isActive": true,
+  "isFeatured": false,
+  "cuisineType": "Srpska"
+}
+
+###
+
+PUT {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c
+Content-Type: application/json
+Authorization: Bearer PASTE_OWNER_TOKEN_OVDE
+
+{
+  "nameSr": "Test Vlasnik Radi",
+  "nameEn": "Test Owner Works",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "address": "Test Adresa 1",
+  "imageUrl": "https://example.com/img.jpg",
+  "isActive": true,
+  "isFeatured": false,
+  "cuisineType": "Srpska"
+}
+
+###
+
+PUT {{RestaurantService_HostAddress}}/api/menu-items/bca22044-b380-44e3-aac1-797d705c655d
+Content-Type: application/json
+
+{
+  "nameSr": "Test Bez Tokena",
+  "nameEn": "Test No Token",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "price": 500,
+  "imageUrl": "https://example.com/img.jpg",
+  "isAvailable": false,
+  "isFeatured": false,
+  "preparationTimeMinutes": 15
+}
+
+###
+
+PUT {{RestaurantService_HostAddress}}/api/menu-items/bca22044-b380-44e3-aac1-797d705c655d
+Content-Type: application/json
+Authorization: Bearer PASTE_OWNER_TOKEN_OVDE
+
+{
+  "nameSr": "Test Vlasnik Menja Meni",
+  "nameEn": "Test Owner Updates Item",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "price": 500,
+  "imageUrl": "https://example.com/img.jpg",
+  "isAvailable": false,
+  "isFeatured": false,
+  "preparationTimeMinutes": 15
+}
+
+###
+
+PUT {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c/opening-hours
+Content-Type: application/json
+Authorization: Bearer PASTE_OWNER_TOKEN_OVDE
+[
+  { "dayOfWeek": 1, "openTime": "08:00", "closeTime": "22:00", "isClosed": false },
+  { "dayOfWeek": 2, "openTime": "08:00", "closeTime": "22:00", "isClosed": false },
+  { "dayOfWeek": 3, "openTime": "08:00", "closeTime": "22:00", "isClosed": false },
+  { "dayOfWeek": 4, "openTime": "08:00", "closeTime": "22:00", "isClosed": false },
+  { "dayOfWeek": 5, "openTime": "08:00", "closeTime": "23:00", "isClosed": false },
+  { "dayOfWeek": 6, "openTime": "10:00", "closeTime": "23:00", "isClosed": false },
+  { "dayOfWeek": 0, "openTime": "10:00", "closeTime": "20:00", "isClosed": false }
+]
+
+###
+
+POST {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c/menus
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjE4NGMxOGQ2LTM3ZGEtNDNmYS1hYjI4LWFlYTQ3YjMzZGM0OCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InZsYXNuaWtAZ3JpemdvLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlJlc3RhdXJhbnRPd25lciIsImZ1bGxOYW1lIjoiVGVzdCBWbGFzbmlrIiwiZXhwIjoxNzg4MDk1Njg0LCJpc3MiOiJHcml6R28uVXNlclNlcnZpY2UiLCJhdWQiOiJHcml6R28ifQ.wHp-A8TuLw0ZVngJjOFROVQURVdEbSnV7iTF-jy22rE
+
+{
+  "nameSr": "Test Meni",
+  "nameEn": "Test Menu",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "displayOrder": 1
+}
+
+###
+
+POST {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c/menus/PASTE_MENU_ID_OVDE/categories
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjE4NGMxOGQ2LTM3ZGEtNDNmYS1hYjI4LWFlYTQ3YjMzZGM0OCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InZsYXNuaWtAZ3JpemdvLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlJlc3RhdXJhbnRPd25lciIsImZ1bGxOYW1lIjoiVGVzdCBWbGFzbmlrIiwiZXhwIjoxNzg4MDk1Njg0LCJpc3MiOiJHcml6R28uVXNlclNlcnZpY2UiLCJhdWQiOiJHcml6R28ifQ.wHp-A8TuLw0ZVngJjOFROVQURVdEbSnV7iTF-jy22rE
+
+{
+  "nameSr": "Test Kategorija",
+  "nameEn": "Test Category",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "displayOrder": 1
+}
+
+###
+
+POST {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c/menus/PASTE_MENU_ID_OVDE/categories/PASTE_CATEGORY_ID_OVDE/items
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjE4NGMxOGQ2LTM3ZGEtNDNmYS1hYjI4LWFlYTQ3YjMzZGM0OCIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InZsYXNuaWtAZ3JpemdvLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlJlc3RhdXJhbnRPd25lciIsImZ1bGxOYW1lIjoiVGVzdCBWbGFzbmlrIiwiZXhwIjoxNzg4MDk1Njg0LCJpc3MiOiJHcml6R28uVXNlclNlcnZpY2UiLCJhdWQiOiJHcml6R28ifQ.wHp-A8TuLw0ZVngJjOFROVQURVdEbSnV7iTF-jy22rE
+
+{
+  "nameSr": "Test Stavka",
+  "nameEn": "Test Item",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "price": 450,
+  "imageUrl": "https://example.com/img.jpg",
+  "isAvailable": true,
+  "isFeatured": false,
+  "preparationTimeMinutes": 10
+}
