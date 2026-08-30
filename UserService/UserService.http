@@ -1,6 +1,14 @@
-@UserService_HostAddress = http://localhost:5238
+@UserService_HostAddress = https://localhost:7265
 
-GET {{UserService_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{UserService_HostAddress}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "test123"
+}
 
 ###
+
+GET {{UserService_HostAddress}}/api/users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6ImIzNTJiODBlLTE5OTUtNDY4ZC05YzVhLTI3OWExMzg1OTliYSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InRlc3RAZXhhbXBsZS5jb20iLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJDdXN0b21lciIsImZ1bGxOYW1lIjoiVGVzdCBLb3Jpc25payIsImV4cCI6MTc4ODA5NDMxNCwiaXNzIjoiR3JpekdvLlVzZXJTZXJ2aWNlIiwiYXVkIjoiR3JpekdvIn0.PG1cAbbZPiFVc-NVX2wInvZj1o-98XKRjLhKxJ76EW8

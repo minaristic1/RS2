@@ -19,5 +19,7 @@ namespace UserService.Application.DTOs
 
         [Required]
         public UserRole Role { get; set; }
+
+        public Guid? RestaurantId { get; set; }
     }
 }
