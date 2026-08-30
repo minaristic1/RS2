@@ -1,6 +1,57 @@
 @RestaurantService_HostAddress = http://localhost:5056
 
-GET {{RestaurantService_HostAddress}}/weatherforecast/
+GET {{RestaurantService_HostAddress}}/api/restaurants
 Accept: application/json
 
 ###
+
+PUT {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c
+Content-Type: application/json
+
+{
+  "nameSr": "Test Bez Tokena",
+  "nameEn": "Test No Token",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "address": "Test Adresa 1",
+  "imageUrl": "https://example.com/img.jpg",
+  "isActive": true,
+  "isFeatured": false,
+  "cuisineType": "Srpska"
+}
+
+###
+
+PUT {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c
+Content-Type: application/json
+Authorization: Bearer PASTE_CUSTOMER_TOKEN_OVDE
+
+{
+  "nameSr": "Test Pogresna Uloga",
+  "nameEn": "Test Wrong Role",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "address": "Test Adresa 1",
+  "imageUrl": "https://example.com/img.jpg",
+  "isActive": true,
+  "isFeatured": false,
+  "cuisineType": "Srpska"
+}
+
+###
+
+PUT {{RestaurantService_HostAddress}}/api/restaurants/5fb7279b-d4b5-4bf8-8488-613bd8831a3c
+Content-Type: application/json
+Authorization: Bearer PASTE_OWNER_TOKEN_OVDE
+
+{
+  "nameSr": "Test Vlasnik Radi",
+  "nameEn": "Test Owner Works",
+  "descriptionSr": "test",
+  "descriptionEn": "test",
+  "address": "Test Adresa 1",
+  "imageUrl": "https://example.com/img.jpg",
+  "isActive": true,
+  "isFeatured": false,
+  "cuisineType": "Srpska"
+}

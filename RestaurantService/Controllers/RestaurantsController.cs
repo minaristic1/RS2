@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 using RestaurantService.Application.DTOs;
 using RestaurantService.Application.Interfaces;
@@ -60,6 +61,7 @@ public class RestaurantsController : ControllerBase
         return Ok(restaurants);
     }
 
+    [Authorize(Roles = "RestaurantOwner,Admin")]
     [HttpPost]
     public async Task<ActionResult<RestaurantResponse>> Create([FromBody] CreateRestaurantRequest request)
     {
@@ -67,6 +69,7 @@ public class RestaurantsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = restaurant.Id }, restaurant);
     }
 
+    [Authorize(Roles = "RestaurantOwner,Admin")]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRestaurantRequest request)
     {
@@ -80,6 +83,7 @@ public class RestaurantsController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Roles = "RestaurantOwner,Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
