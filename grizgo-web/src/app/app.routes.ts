@@ -7,11 +7,13 @@ import { CartViewComponent } from './cart/cart-view/cart-view.component';
 import { CourierDashboardComponent } from './courier/courier-dashboard/courier-dashboard.component';
 import { RestaurantOrdersComponent } from './restaurant-orders/restaurant-orders/restaurant-orders.component';
 import { RegisterComponent } from './auth/register/register.component';
+import { LoginComponent } from './auth/login/login.component';
 import { NotFoundComponent } from './shared/not-found/not-found.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'restaurants', pathMatch: 'full' },
   { path: 'register', component: RegisterComponent },
+  { path: 'login', component: LoginComponent },
   { path: 'track', component: DeliveryTrackingComponent },
   { path: 'restaurants', component: RestaurantListComponent },
   { path: 'restaurants/new', component: RestaurantCreateComponent },

@@ -4,10 +4,11 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { clientIdInterceptor } from './shared/interceptors/client-id.interceptor';
+import { authInterceptor } from './shared/interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptors([clientIdInterceptor]))
+    provideHttpClient(withInterceptors([clientIdInterceptor, authInterceptor]))
   ]
 };

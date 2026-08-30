@@ -3,7 +3,7 @@
 
   @if (success()) {
     <div class="alert alert-success" style="max-width: 420px;">
-      Uspešno si se registrovala! (Prijava još nije dostupna — sačekaj da stigne login endpoint.)
+      Uspešno si se registrovala! <a routerLink="/login">Prijavi se</a>.
     </div>
   } @else {
     <form (ngSubmit)="submit()" style="max-width: 420px;">

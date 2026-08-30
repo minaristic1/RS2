@@ -1,0 +1,27 @@
+<div class="login-container">
+  <h2 class="mb-3">Prijava</h2>
+
+  <form (ngSubmit)="submit()" style="max-width: 380px;">
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input class="form-control" type="email" [(ngModel)]="form.email" name="email" required />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Lozinka</label>
+      <input class="form-control" type="password" [(ngModel)]="form.password" name="password" required />
+    </div>
+
+    @if (error()) {
+      <div class="alert alert-danger">Pogrešan email ili lozinka.</div>
+    }
+
+    <button type="submit" class="btn btn-primary" [disabled]="saving()">
+      {{ saving() ? 'Prijavljivanje...' : 'Prijavi se' }}
+    </button>
+
+    <p class="mt-3 small">
+      Nemaš nalog? <a routerLink="/register">Registruj se</a>
+    </p>
+  </form>
+</div>
