@@ -9,6 +9,10 @@
     <div class="alert alert-danger">Restoran nije pronađen.</div>
   }
 
+  @if (error()) {
+    <div class="alert alert-danger">Trenutno ne možemo da učitamo restoran. Proveri da li je servis pokrenut.</div>
+  }
+
   @if (restaurant(); as r) {
     <div class="card mx-auto" style="max-width: 900px;">
       @if (r.imageUrl) {
@@ -31,6 +35,8 @@
 
         @if (menuLoading()) {
           <p class="text-muted">Učitavanje menija...</p>
+        } @else if (menuError()) {
+          <div class="alert alert-danger">Trenutno ne možemo da učitamo meni. Proveri da li je servis pokrenut.</div>
         } @else if (menuList() && menuList()!.menus.length > 0) {
           @if (menuList()!.menus.length > 1) {
             <ul class="nav nav-tabs mb-3">
@@ -101,6 +107,9 @@
           @if (addedConfirmation()) {
             <div class="alert alert-success py-2">Dodato u korpu!</div>
           } @else {
+            @if (addToCartError()) {
+              <div class="alert alert-danger py-2">Nije uspelo dodavanje u korpu. Pokušaj ponovo.</div>
+            }
             <button class="btn btn-accent w-100" [disabled]="addingToCart()" (click)="addToCart()">
               {{ addingToCart() ? 'Dodavanje...' : 'Dodaj u korpu' }}
             </button>

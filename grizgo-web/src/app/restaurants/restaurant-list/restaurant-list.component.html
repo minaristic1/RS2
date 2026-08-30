@@ -1,8 +1,25 @@
 <div class="restaurant-list-container">
-  <h2 class="mb-3">Restorani</h2>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Restorani</h2>
+    <a routerLink="/restaurants/new" class="btn btn-outline-primary btn-sm">+ Dodaj restoran</a>
+  </div>
+
+  <div class="input-group mb-3" style="max-width: 400px;">
+    <input
+      class="form-control"
+      placeholder="Pretraži restorane..."
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="search()"
+    />
+    <button class="btn btn-primary" (click)="search()">Pretraži</button>
+  </div>
 
   @if (loading()) {
     <p>Učitavanje...</p>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">Trenutno ne možemo da učitamo restorane. Proveri da li je servis pokrenut.</div>
   }
 
   <div class="row g-3">

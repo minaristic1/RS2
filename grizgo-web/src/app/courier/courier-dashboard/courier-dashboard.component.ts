@@ -24,6 +24,8 @@ const STATUS_BADGE_CLASSES = ['bg-secondary', 'bg-info', 'bg-warning text-dark',
 export class CourierDashboardComponent implements OnInit {
   deliveries = signal<DeliveryOrder[]>([]);
   loading = signal(true);
+  error = signal(false);
+  actionError = signal(false);
   courierId: string;
   statusSteps = STATUS_STEPS;
 
@@ -48,6 +50,7 @@ export class CourierDashboardComponent implements OnInit {
 
   loadDeliveries(): void {
     this.loading.set(true);
+    this.error.set(false);
     this.courierService.getAll().subscribe({
       next: (result) => {
         this.deliveries.set(result);
@@ -55,19 +58,24 @@ export class CourierDashboardComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
+        this.error.set(true);
       }
     });
   }
 
   takeDelivery(id: string): void {
+    this.actionError.set(false);
     this.courierService.assignCourier(id, this.courierId).subscribe({
-      next: () => this.loadDeliveries()
+      next: () => this.loadDeliveries(),
+      error: () => this.actionError.set(true)
     });
   }
 
   advanceStatus(id: string): void {
+    this.actionError.set(false);
     this.courierService.advanceStatus(id).subscribe({
-      next: () => this.loadDeliveries()
+      next: () => this.loadDeliveries(),
+      error: () => this.actionError.set(true)
     });
   }
 

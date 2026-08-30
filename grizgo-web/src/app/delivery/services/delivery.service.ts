@@ -12,4 +12,8 @@ export class DeliveryService {
   getByOrderId(orderId: string): Observable<DeliveryOrder> {
     return this.http.get<DeliveryOrder>(`${this.baseUrl}/by-order/${orderId}`);
   }
+
+  cancel(id: string): Observable<DeliveryOrder> {
+    return this.http.post<DeliveryOrder>(`${this.baseUrl}/${id}/cancel`, {});
+  }
 }

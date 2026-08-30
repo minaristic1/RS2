@@ -13,6 +13,8 @@ import { Cart } from '../models/cart';
 export class CartViewComponent implements OnInit {
   cart = signal<Cart | null>(null);
   loading = signal(true);
+  error = signal(false);
+  actionError = signal(false);
 
   constructor(private cartService: CartService) {}
 
@@ -22,6 +24,7 @@ export class CartViewComponent implements OnInit {
 
   loadCart(): void {
     this.loading.set(true);
+    this.error.set(false);
     this.cartService.getCart().subscribe({
       next: (result) => {
         this.cart.set(result);
@@ -29,13 +32,16 @@ export class CartViewComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
+        this.error.set(true);
       }
     });
   }
 
   increaseQuantity(productId: string, currentQuantity: number): void {
+    this.actionError.set(false);
     this.cartService.updateItemQuantity(productId, currentQuantity + 1).subscribe({
-      next: (result) => this.cart.set(result)
+      next: (result) => this.cart.set(result),
+      error: () => this.actionError.set(true)
     });
   }
 
@@ -44,20 +50,26 @@ export class CartViewComponent implements OnInit {
       this.removeItem(productId);
       return;
     }
+    this.actionError.set(false);
     this.cartService.updateItemQuantity(productId, currentQuantity - 1).subscribe({
-      next: (result) => this.cart.set(result)
+      next: (result) => this.cart.set(result),
+      error: () => this.actionError.set(true)
     });
   }
 
   removeItem(productId: string): void {
+    this.actionError.set(false);
     this.cartService.removeItem(productId).subscribe({
-      next: (result) => this.cart.set(result)
+      next: (result) => this.cart.set(result),
+      error: () => this.actionError.set(true)
     });
   }
 
   checkout(): void {
+    this.actionError.set(false);
     this.cartService.checkout().subscribe({
-      next: () => this.loadCart()
+      next: () => this.loadCart(),
+      error: () => this.actionError.set(true)
     });
   }
 }

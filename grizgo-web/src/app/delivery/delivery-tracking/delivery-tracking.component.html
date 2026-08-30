@@ -14,6 +14,10 @@
     <div class="alert alert-danger" style="max-width: 480px;">Porudžbina nije pronađena.</div>
   }
 
+  @if (error()) {
+    <div class="alert alert-danger" style="max-width: 480px;">Trenutno ne možemo da učitamo porudžbinu. Proveri da li je servis pokrenut.</div>
+  }
+
   @if (delivery(); as d) {
     <div class="card" style="max-width: 480px;">
       <div class="card-body">
@@ -22,11 +26,17 @@
         <p><strong>Adresa dostave:</strong> {{ d.deliveryAddress }}</p>
         <p><strong>Ukupno:</strong> {{ d.totalPrice }} RSD</p>
         <h3 class="h5">Stavke:</h3>
-        <ul class="list-group list-group-flush">
+        <ul class="list-group list-group-flush mb-3">
           @for (item of d.items; track item.id) {
             <li class="list-group-item">{{ item.productName }} x{{ item.quantity }} - {{ item.unitPrice }} RSD</li>
           }
         </ul>
+
+        @if (canCancel(d.status)) {
+          <button class="btn btn-outline-danger btn-sm" [disabled]="cancelling()" (click)="cancel()">
+            {{ cancelling() ? 'Otkazivanje...' : 'Otkaži porudžbinu' }}
+          </button>
+        }
       </div>
     </div>
   }

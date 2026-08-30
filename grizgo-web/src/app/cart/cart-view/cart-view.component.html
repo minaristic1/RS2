@@ -5,6 +5,14 @@
     <p>Učitavanje...</p>
   }
 
+  @if (error()) {
+    <div class="alert alert-danger">Trenutno ne možemo da učitamo korpu. Proveri da li je servis pokrenut.</div>
+  }
+
+  @if (actionError()) {
+    <div class="alert alert-danger">Nešto nije uspelo. Pokušaj ponovo.</div>
+  }
+
   @if (cart(); as c) {
     @if (c.items.length === 0) {
       <p class="text-muted">Korpa je prazna.</p>

@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { RestaurantService } from '../services/restaurant.service';
 import { Restaurant } from '../models/restaurant';
@@ -17,15 +18,18 @@ export class RestaurantDetailComponent implements OnInit {
   restaurant = signal<Restaurant | null>(null);
   loading = signal(true);
   notFound = signal(false);
+  error = signal(false);
 
   menuList = signal<RestaurantMenuList | null>(null);
   menuLoading = signal(true);
+  menuError = signal(false);
   activeMenuIndex = signal(0);
 
   selectedItem = signal<MenuItemSummary | null>(null);
   selectedQuantity = signal(1);
   addingToCart = signal(false);
   addedConfirmation = signal(false);
+  addToCartError = signal(false);
 
   constructor(
     private route: ActivatedRoute,
@@ -47,8 +51,12 @@ export class RestaurantDetailComponent implements OnInit {
         this.restaurant.set(result);
         this.loading.set(false);
       },
-      error: () => {
-        this.notFound.set(true);
+      error: (err: HttpErrorResponse) => {
+        if (err.status === 404) {
+          this.notFound.set(true);
+        } else {
+          this.error.set(true);
+        }
         this.loading.set(false);
       }
     });
@@ -60,6 +68,7 @@ export class RestaurantDetailComponent implements OnInit {
       },
       error: () => {
         this.menuLoading.set(false);
+        this.menuError.set(true);
       }
     });
   }
@@ -68,6 +77,7 @@ export class RestaurantDetailComponent implements OnInit {
     this.selectedItem.set(item);
     this.selectedQuantity.set(1);
     this.addedConfirmation.set(false);
+    this.addToCartError.set(false);
   }
 
   closeItem(): void {
@@ -89,6 +99,7 @@ export class RestaurantDetailComponent implements OnInit {
     }
 
     this.addingToCart.set(true);
+    this.addToCartError.set(false);
     this.cartService.addItem(item.id, this.selectedQuantity()).subscribe({
       next: () => {
         this.addingToCart.set(false);
@@ -96,6 +107,7 @@ export class RestaurantDetailComponent implements OnInit {
       },
       error: () => {
         this.addingToCart.set(false);
+        this.addToCartError.set(true);
       }
     });
   }

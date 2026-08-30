@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { RestaurantOrdersService } from '../services/restaurant-orders.service';
 import { RestaurantService } from '../../restaurants/services/restaurant.service';
 import { DeliveryOrder } from '../../delivery/models/delivery-order';
@@ -15,7 +16,7 @@ const STORAGE_KEY = 'grizgo-selected-restaurant-id';
 @Component({
   selector: 'app-restaurant-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './restaurant-orders.component.html',
   styleUrl: './restaurant-orders.component.css'
 })
@@ -23,6 +24,8 @@ export class RestaurantOrdersComponent implements OnInit {
   restaurants = signal<Restaurant[]>([]);
   deliveries = signal<DeliveryOrder[]>([]);
   loading = signal(true);
+  error = signal(false);
+  actionError = signal(false);
   selectedRestaurantId = signal<string>(localStorage.getItem(STORAGE_KEY) ?? '');
 
   incomingOrders = computed(() =>
@@ -40,7 +43,8 @@ export class RestaurantOrdersComponent implements OnInit {
 
   ngOnInit(): void {
     this.restaurantService.getAll().subscribe({
-      next: (result) => this.restaurants.set(result)
+      next: (result) => this.restaurants.set(result),
+      error: () => this.error.set(true)
     });
 
     this.loadDeliveries();
@@ -48,6 +52,7 @@ export class RestaurantOrdersComponent implements OnInit {
 
   loadDeliveries(): void {
     this.loading.set(true);
+    this.error.set(false);
     this.restaurantOrdersService.getAll().subscribe({
       next: (result) => {
         this.deliveries.set(result);
@@ -55,6 +60,7 @@ export class RestaurantOrdersComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
+        this.error.set(true);
       }
     });
   }
@@ -65,14 +71,18 @@ export class RestaurantOrdersComponent implements OnInit {
   }
 
   advanceStatus(id: string): void {
+    this.actionError.set(false);
     this.restaurantOrdersService.advanceStatus(id).subscribe({
-      next: () => this.loadDeliveries()
+      next: () => this.loadDeliveries(),
+      error: () => this.actionError.set(true)
     });
   }
 
   cancel(id: string): void {
+    this.actionError.set(false);
     this.restaurantOrdersService.cancel(id).subscribe({
-      next: () => this.loadDeliveries()
+      next: () => this.loadDeliveries(),
+      error: () => this.actionError.set(true)
     });
   }
 

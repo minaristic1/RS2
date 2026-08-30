@@ -1,0 +1,47 @@
+<div class="register-container">
+  <h2 class="mb-3">Registracija</h2>
+
+  @if (success()) {
+    <div class="alert alert-success" style="max-width: 420px;">
+      Uspešno si se registrovala! (Prijava još nije dostupna — sačekaj da stigne login endpoint.)
+    </div>
+  } @else {
+    <form (ngSubmit)="submit()" style="max-width: 420px;">
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input class="form-control" type="email" [(ngModel)]="form.email" name="email" required />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Lozinka</label>
+        <input class="form-control" type="password" [(ngModel)]="form.password" name="password" required minlength="6" />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Ime i prezime</label>
+        <input class="form-control" [(ngModel)]="form.fullName" name="fullName" required />
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Uloga</label>
+        <select class="form-select" [(ngModel)]="form.role" name="role">
+          @for (r of roles; track r.value) {
+            <option [value]="r.value">{{ r.label }}</option>
+          }
+        </select>
+      </div>
+
+      @if (emailTaken()) {
+        <div class="alert alert-danger">Korisnik sa ovim email-om već postoji.</div>
+      }
+
+      @if (error()) {
+        <div class="alert alert-danger">Došlo je do greške. Proveri podatke i pokušaj ponovo.</div>
+      }
+
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Registracija...' : 'Registruj se' }}
+      </button>
+    </form>
+  }
+</div>

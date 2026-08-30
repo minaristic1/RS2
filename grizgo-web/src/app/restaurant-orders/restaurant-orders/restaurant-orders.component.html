@@ -15,8 +15,20 @@
     </select>
   </div>
 
+  @if (selectedRestaurantId()) {
+    <a [routerLink]="['/restaurants', selectedRestaurantId(), 'edit']" class="btn btn-outline-secondary btn-sm mb-4">Izmeni podatke restorana</a>
+  }
+
   @if (loading()) {
     <p>Učitavanje...</p>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">Trenutno ne možemo da učitamo podatke. Proveri da li su servisi pokrenuti.</div>
+  }
+
+  @if (actionError()) {
+    <div class="alert alert-danger">Nešto nije uspelo. Pokušaj ponovo.</div>
   }
 
   @if (!selectedRestaurantId()) {
