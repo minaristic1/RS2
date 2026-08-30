@@ -1,6 +1,8 @@
-﻿using Moq;
+using Moq;
+using RestaurantService.Application.Common;
 using RestaurantService.Application.Interfaces;
 using RestaurantService.Application.DTOs;
+using RestaurantService.Application.Security;
 using RestaurantService.Application.Services;
 using RestaurantService.Domain.Entities;
 
@@ -10,6 +12,8 @@ public class RestaurantAppServiceTests
 {
     private readonly Mock<IRestaurantRepository> _repositoryMock;
     private readonly RestaurantAppService _appService;
+
+    private static readonly RequestingUser AdminUser = new(Guid.NewGuid(), "Admin", null);
 
     public RestaurantAppServiceTests()
     {
@@ -30,33 +34,69 @@ public class RestaurantAppServiceTests
     }
 
     [Fact]
-    public async Task DeleteAsync_WhenRestaurantDoesNotExist_ReturnsFalse()
+    public async Task DeleteAsync_WhenRestaurantDoesNotExist_ReturnsNotFound()
     {
         var restaurantId = Guid.NewGuid();
 
         _repositoryMock.Setup(repository => repository.GetByIdAsync(restaurantId)).ReturnsAsync((Restaurant?)null);
 
-        var result = await _appService.DeleteAsync(restaurantId);
+        var result = await _appService.DeleteAsync(restaurantId, AdminUser);
 
-        Assert.False(result);
+        Assert.Equal(ServiceStatus.NotFound, result.Status);
 
         _repositoryMock.Verify(repository => repository.DeleteAsync(It.IsAny<Guid>()), Times.Never);
     }
 
     [Fact]
-    public async Task DeleteAsync_WhenRestaurantExists_DeletesAndReturnsTrue()
+    public async Task DeleteAsync_WhenCalledByAdmin_DeletesAndReturnsSuccess()
     {
         var restaurantId = Guid.NewGuid();
-        var restaurant = new Restaurant { Id = restaurantId };
+        var restaurant = new Restaurant { Id = restaurantId, OwnerId = Guid.NewGuid() };
 
         _repositoryMock.Setup(repository => repository.GetByIdAsync(restaurantId)).ReturnsAsync(restaurant);
 
-        var result = await _appService.DeleteAsync(restaurantId);
+        var result = await _appService.DeleteAsync(restaurantId, AdminUser);
 
-        Assert.True(result);
+        Assert.Equal(ServiceStatus.Success, result.Status);
 
         _repositoryMock.Verify(repository => repository.DeleteAsync(restaurantId), Times.Once);
         _repositoryMock.Verify(repository => repository.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_WhenCalledByADifferentOwner_ReturnsForbiddenAndDoesNotDelete()
+    {
+        var restaurantId = Guid.NewGuid();
+        var actualOwnerId = Guid.NewGuid();
+        var restaurant = new Restaurant { Id = restaurantId, OwnerId = actualOwnerId };
+
+        var someoneElse = new RequestingUser(Guid.NewGuid(), "RestaurantOwner", null);
+
+        _repositoryMock.Setup(repository => repository.GetByIdAsync(restaurantId)).ReturnsAsync(restaurant);
+
+        var result = await _appService.DeleteAsync(restaurantId, someoneElse);
+
+        Assert.Equal(ServiceStatus.Forbidden, result.Status);
+
+        _repositoryMock.Verify(repository => repository.DeleteAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_WhenCalledByTheOwningOwner_DeletesAndReturnsSuccess()
+    {
+        var restaurantId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+        var restaurant = new Restaurant { Id = restaurantId, OwnerId = ownerId };
+
+        var owner = new RequestingUser(ownerId, "RestaurantOwner", null);
+
+        _repositoryMock.Setup(repository => repository.GetByIdAsync(restaurantId)).ReturnsAsync(restaurant);
+
+        var result = await _appService.DeleteAsync(restaurantId, owner);
+
+        Assert.Equal(ServiceStatus.Success, result.Status);
+
+        _repositoryMock.Verify(repository => repository.DeleteAsync(restaurantId), Times.Once);
     }
 
     [Fact]
@@ -120,17 +160,52 @@ public class RestaurantAppServiceTests
     }
 
     [Fact]
-    public async Task UpdateAsync_WhenRestaurantDoesNotExist_ReturnsFalse()
+    public async Task UpdateAsync_WhenRestaurantDoesNotExist_ReturnsNotFound()
     {
         var restaurantId = Guid.NewGuid();
         var request = new UpdateRestaurantRequest();
 
         _repositoryMock.Setup(repository => repository.GetByIdAsync(restaurantId)).ReturnsAsync((Restaurant?)null);
 
-        var result = await _appService.UpdateAsync(restaurantId, request);
+        var result = await _appService.UpdateAsync(restaurantId, request, AdminUser);
 
-        Assert.False(result);
+        Assert.Equal(ServiceStatus.NotFound, result.Status);
 
         _repositoryMock.Verify(repository => repository.UpdateAsync(It.IsAny<Restaurant>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenCalledByADifferentOwner_ReturnsForbiddenAndDoesNotUpdate()
+    {
+        var restaurantId = Guid.NewGuid();
+        var actualOwnerId = Guid.NewGuid();
+        var restaurant = new Restaurant { Id = restaurantId, OwnerId = actualOwnerId };
+        var request = new UpdateRestaurantRequest();
+
+        var someoneElse = new RequestingUser(Guid.NewGuid(), "RestaurantOwner", null);
+
+        _repositoryMock.Setup(repository => repository.GetByIdAsync(restaurantId)).ReturnsAsync(restaurant);
+
+        var result = await _appService.UpdateAsync(restaurantId, request, someoneElse);
+
+        Assert.Equal(ServiceStatus.Forbidden, result.Status);
+
+        _repositoryMock.Verify(repository => repository.UpdateAsync(It.IsAny<Restaurant>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenRestaurantHasNoOwnerYet_OnlyAdminCanUpdate()
+    {
+        var restaurantId = Guid.NewGuid();
+        var restaurant = new Restaurant { Id = restaurantId, OwnerId = null };
+        var request = new UpdateRestaurantRequest();
+
+        var anyOwner = new RequestingUser(Guid.NewGuid(), "RestaurantOwner", null);
+
+        _repositoryMock.Setup(repository => repository.GetByIdAsync(restaurantId)).ReturnsAsync(restaurant);
+
+        var result = await _appService.UpdateAsync(restaurantId, request, anyOwner);
+
+        Assert.Equal(ServiceStatus.Forbidden, result.Status);
     }
 }

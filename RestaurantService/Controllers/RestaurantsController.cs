@@ -1,12 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
+using RestaurantService.Application.Common;
 using RestaurantService.Application.DTOs;
 using RestaurantService.Application.Interfaces;
+using RestaurantService.Extensions;
 
 namespace RestaurantService.Controllers;
 
@@ -65,7 +68,8 @@ public class RestaurantsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<RestaurantResponse>> Create([FromBody] CreateRestaurantRequest request)
     {
-        var restaurant = await _restaurantAppService.CreateAsync(request);
+        var ownerId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var restaurant = await _restaurantAppService.CreateAsync(request, ownerId);
         return CreatedAtAction(nameof(GetById), new { id = restaurant.Id }, restaurant);
     }
 
@@ -73,83 +77,83 @@ public class RestaurantsController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRestaurantRequest request)
     {
-        var success = await _restaurantAppService.UpdateAsync(id, request);
+        var result = await _restaurantAppService.UpdateAsync(id, request, User.ToRequestingUser());
 
-        if (!success)
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        return NoContent();
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => NoContent()
+        };
     }
 
     [Authorize(Roles = "RestaurantOwner,Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var success = await _restaurantAppService.DeleteAsync(id);
+        var result = await _restaurantAppService.DeleteAsync(id, User.ToRequestingUser());
 
-        if (!success)
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        return NoContent();
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => NoContent()
+        };
     }
 
     [Authorize(Roles = "RestaurantOwner,Admin")]
     [HttpPut("{id:guid}/opening-hours")]
     public async Task<IActionResult> SetOpeningHours(Guid id, [FromBody] List<OpeningHourEntryRequest> request)
     {
-        var success = await _restaurantAppService.SetOpeningHoursAsync(id, request);
+        var result = await _restaurantAppService.SetOpeningHoursAsync(id, request, User.ToRequestingUser());
 
-        if (!success)
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        return NoContent();
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => NoContent()
+        };
     }
 
     [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
     [HttpPost("{restaurantId:guid}/menus")]
     public async Task<ActionResult<MenuResponse>> CreateMenu(Guid restaurantId, [FromBody] CreateMenuRequest request)
     {
-        var menu = await _restaurantAppService.CreateMenuAsync(restaurantId, request);
+        var result = await _restaurantAppService.CreateMenuAsync(restaurantId, request, User.ToRequestingUser());
 
-        if (menu is null)
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        return StatusCode(StatusCodes.Status201Created, menu);
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => StatusCode(StatusCodes.Status201Created, result.Value)
+        };
     }
 
     [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
     [HttpPost("{restaurantId:guid}/menus/{menuId:guid}/categories")]
     public async Task<ActionResult<MenuCategoryResponse>> CreateMenuCategory(Guid restaurantId, Guid menuId, [FromBody] CreateMenuCategoryRequest request)
     {
-        var category = await _restaurantAppService.CreateMenuCategoryAsync(restaurantId, menuId, request);
+        var result = await _restaurantAppService.CreateMenuCategoryAsync(restaurantId, menuId, request, User.ToRequestingUser());
 
-        if (category is null)
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        return StatusCode(StatusCodes.Status201Created, category);
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => StatusCode(StatusCodes.Status201Created, result.Value)
+        };
     }
 
     [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
     [HttpPost("{restaurantId:guid}/menus/{menuId:guid}/categories/{categoryId:guid}/items")]
     public async Task<ActionResult<MenuItemSummaryResponse>> CreateMenuItem(Guid restaurantId, Guid menuId, Guid categoryId, [FromBody] CreateMenuItemRequest request)
     {
-        var item = await _restaurantAppService.CreateMenuItemAsync(restaurantId, menuId, categoryId, request);
+        var result = await _restaurantAppService.CreateMenuItemAsync(restaurantId, menuId, categoryId, request, User.ToRequestingUser());
 
-        if (item is null)
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        return StatusCode(StatusCodes.Status201Created, item);
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => StatusCode(StatusCodes.Status201Created, result.Value)
+        };
     }
 }

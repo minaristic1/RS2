@@ -16,6 +16,8 @@ namespace RestaurantService.Infrastructure.Persistence.Configurations
 
             builder.HasKey(restaurant => restaurant.Id);
 
+            builder.Property(restaurant => restaurant.OwnerId);
+
             builder.Property(restaurant => restaurant.NameSr)
                 .IsRequired()
                 .HasMaxLength(200);

@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 using System.Threading.Tasks;
 
+using RestaurantService.Application.Common;
 using RestaurantService.Application.DTOs;
+using RestaurantService.Application.Security;
 
 namespace RestaurantService.Application.Interfaces;
 
@@ -20,21 +22,21 @@ public interface IRestaurantAppService
 
     Task<List<RestaurantResponse>> SearchByNameAsync(string searchTerm);
 
-    Task<RestaurantResponse> CreateAsync(CreateRestaurantRequest request);
+    Task<RestaurantResponse> CreateAsync(CreateRestaurantRequest request, Guid ownerId);
 
-    Task<bool> UpdateAsync(Guid id, UpdateRestaurantRequest request);
+    Task<ServiceResult> UpdateAsync(Guid id, UpdateRestaurantRequest request, RequestingUser requestingUser);
 
-    Task<bool> DeleteAsync(Guid id);
+    Task<ServiceResult> DeleteAsync(Guid id, RequestingUser requestingUser);
 
-    Task<bool> UpdateMenuItemAsync(Guid id, UpdateMenuItemRequest request);
+    Task<ServiceResult> UpdateMenuItemAsync(Guid id, UpdateMenuItemRequest request, RequestingUser requestingUser);
 
-    Task<bool> DeleteMenuItemAsync(Guid id);
+    Task<ServiceResult> DeleteMenuItemAsync(Guid id, RequestingUser requestingUser);
 
-    Task<bool> SetOpeningHoursAsync(Guid restaurantId, List<OpeningHourEntryRequest> request);
+    Task<ServiceResult> SetOpeningHoursAsync(Guid restaurantId, List<OpeningHourEntryRequest> request, RequestingUser requestingUser);
 
-    Task<MenuResponse?> CreateMenuAsync(Guid restaurantId, CreateMenuRequest request);
+    Task<ServiceResult<MenuResponse>> CreateMenuAsync(Guid restaurantId, CreateMenuRequest request, RequestingUser requestingUser);
 
-    Task<MenuCategoryResponse?> CreateMenuCategoryAsync(Guid restaurantId, Guid menuId, CreateMenuCategoryRequest request);
+    Task<ServiceResult<MenuCategoryResponse>> CreateMenuCategoryAsync(Guid restaurantId, Guid menuId, CreateMenuCategoryRequest request, RequestingUser requestingUser);
 
-    Task<MenuItemSummaryResponse?> CreateMenuItemAsync(Guid restaurantId, Guid menuId, Guid categoryId, CreateMenuItemRequest request);
+    Task<ServiceResult<MenuItemSummaryResponse>> CreateMenuItemAsync(Guid restaurantId, Guid menuId, Guid categoryId, CreateMenuItemRequest request, RequestingUser requestingUser);
 }

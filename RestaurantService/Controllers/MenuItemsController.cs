@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using RestaurantService.Application.Common;
 using RestaurantService.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using RestaurantService.Application.DTOs;
+using RestaurantService.Extensions;
 
 namespace RestaurantService.Controllers;
 
@@ -33,27 +35,27 @@ public class MenuItemsController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateMenuItemRequest request)
     {
-        var success = await _restaurantAppService.UpdateMenuItemAsync(id, request);
+        var result = await _restaurantAppService.UpdateMenuItemAsync(id, request, User.ToRequestingUser());
 
-        if (!success)
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        return NoContent();
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => NoContent()
+        };
     }
 
     [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var success = await _restaurantAppService.DeleteMenuItemAsync(id);
+        var result = await _restaurantAppService.DeleteMenuItemAsync(id, User.ToRequestingUser());
 
-        if (!success)
+        return result.Status switch
         {
-            return NotFound();
-        }
-
-        return NoContent();
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => NoContent()
+        };
     }
 }

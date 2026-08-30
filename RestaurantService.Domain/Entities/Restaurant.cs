@@ -11,6 +11,8 @@ namespace RestaurantService.Domain.Entities
     {
         public Guid Id { get; set; }
 
+        public Guid? OwnerId { get; set; }
+
         public string NameSr { get; set; } = string.Empty;
 
         public string NameEn { get; set; } = string.Empty;

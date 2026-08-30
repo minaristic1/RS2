@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
 
+using RestaurantService.Application.Common;
 using RestaurantService.Application.DTOs;
 using RestaurantService.Application.Interfaces;
+using RestaurantService.Application.Security;
 using RestaurantService.Domain.Entities;
 
 namespace RestaurantService.Application.Services;
@@ -74,11 +76,12 @@ public class RestaurantAppService : IRestaurantAppService
         };
     }
 
-    public async Task<RestaurantResponse> CreateAsync(CreateRestaurantRequest request)
+    public async Task<RestaurantResponse> CreateAsync(CreateRestaurantRequest request, Guid ownerId)
     {
         var restaurant = new Restaurant
         {
             Id = Guid.NewGuid(),
+            OwnerId = ownerId,
             NameSr = request.NameSr,
             NameEn = request.NameEn,
             DescriptionSr = request.DescriptionSr,
@@ -96,13 +99,18 @@ public class RestaurantAppService : IRestaurantAppService
         return MapToResponse(restaurant);
     }
 
-    public async Task<bool> UpdateAsync(Guid id, UpdateRestaurantRequest request)
+    public async Task<ServiceResult> UpdateAsync(Guid id, UpdateRestaurantRequest request, RequestingUser requestingUser)
     {
         var restaurant = await _repository.GetByIdAsync(id);
 
         if (restaurant is null)
         {
-            return false;
+            return ServiceResult.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult.Forbidden();
         }
 
         restaurant.NameSr = request.NameSr;
@@ -118,31 +126,48 @@ public class RestaurantAppService : IRestaurantAppService
         await _repository.UpdateAsync(restaurant);
         await _repository.SaveChangesAsync();
 
-        return true;
+        return ServiceResult.Success();
     }
 
-    public async Task<bool> DeleteAsync(Guid id)
+    public async Task<ServiceResult> DeleteAsync(Guid id, RequestingUser requestingUser)
     {
         var restaurant = await _repository.GetByIdAsync(id);
 
         if (restaurant is null)
         {
-            return false;
+            return ServiceResult.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult.Forbidden();
         }
 
         await _repository.DeleteAsync(id);
         await _repository.SaveChangesAsync();
 
-        return true;
+        return ServiceResult.Success();
     }
 
-    public async Task<bool> UpdateMenuItemAsync(Guid id, UpdateMenuItemRequest request)
+    public async Task<ServiceResult> UpdateMenuItemAsync(Guid id, UpdateMenuItemRequest request, RequestingUser requestingUser)
     {
         var menuItem = await _repository.GetTrackedMenuItemByIdAsync(id);
 
         if (menuItem is null)
         {
-            return false;
+            return ServiceResult.NotFound();
+        }
+
+        var restaurant = await _repository.GetByIdAsync(menuItem.RestaurantId);
+
+        if (restaurant is null)
+        {
+            return ServiceResult.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult.Forbidden();
         }
 
         menuItem.NameSr = request.NameSr;
@@ -157,31 +182,48 @@ public class RestaurantAppService : IRestaurantAppService
 
         await _repository.SaveChangesAsync();
 
-        return true;
+        return ServiceResult.Success();
     }
 
-    public async Task<bool> DeleteMenuItemAsync(Guid id)
+    public async Task<ServiceResult> DeleteMenuItemAsync(Guid id, RequestingUser requestingUser)
     {
         var menuItem = await _repository.GetTrackedMenuItemByIdAsync(id);
 
         if (menuItem is null)
         {
-            return false;
+            return ServiceResult.NotFound();
+        }
+
+        var restaurant = await _repository.GetByIdAsync(menuItem.RestaurantId);
+
+        if (restaurant is null)
+        {
+            return ServiceResult.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult.Forbidden();
         }
 
         await _repository.DeleteMenuItemAsync(id);
         await _repository.SaveChangesAsync();
 
-        return true;
+        return ServiceResult.Success();
     }
 
-    public async Task<bool> SetOpeningHoursAsync(Guid restaurantId, List<OpeningHourEntryRequest> request)
+    public async Task<ServiceResult> SetOpeningHoursAsync(Guid restaurantId, List<OpeningHourEntryRequest> request, RequestingUser requestingUser)
     {
         var restaurant = await _repository.GetByIdAsync(restaurantId);
 
         if (restaurant is null)
         {
-            return false;
+            return ServiceResult.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult.Forbidden();
         }
 
         var newHours = request.Select(entry => new RestaurantOpeningHours
@@ -197,16 +239,21 @@ public class RestaurantAppService : IRestaurantAppService
         await _repository.ReplaceOpeningHoursAsync(restaurantId, newHours);
         await _repository.SaveChangesAsync();
 
-        return true;
+        return ServiceResult.Success();
     }
 
-    public async Task<MenuResponse?> CreateMenuAsync(Guid restaurantId, CreateMenuRequest request)
+    public async Task<ServiceResult<MenuResponse>> CreateMenuAsync(Guid restaurantId, CreateMenuRequest request, RequestingUser requestingUser)
     {
-        var restaurantExists = await _repository.RestaurantExistsAsync(restaurantId);
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
 
-        if (!restaurantExists)
+        if (restaurant is null)
         {
-            return null;
+            return ServiceResult<MenuResponse>.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult<MenuResponse>.Forbidden();
         }
 
         var menu = new Menu
@@ -224,7 +271,7 @@ public class RestaurantAppService : IRestaurantAppService
         await _repository.AddMenuAsync(menu);
         await _repository.SaveChangesAsync();
 
-        return new MenuResponse
+        return ServiceResult<MenuResponse>.Success(new MenuResponse
         {
             Id = menu.Id,
             RestaurantId = menu.RestaurantId,
@@ -234,16 +281,28 @@ public class RestaurantAppService : IRestaurantAppService
             DescriptionEn = menu.DescriptionEn,
             DisplayOrder = menu.DisplayOrder,
             IsActive = menu.IsActive
-        };
+        });
     }
 
-    public async Task<MenuCategoryResponse?> CreateMenuCategoryAsync(Guid restaurantId, Guid menuId, CreateMenuCategoryRequest request)
+    public async Task<ServiceResult<MenuCategoryResponse>> CreateMenuCategoryAsync(Guid restaurantId, Guid menuId, CreateMenuCategoryRequest request, RequestingUser requestingUser)
     {
         var menu = await _repository.GetMenuByIdAsync(menuId);
 
         if (menu is null || menu.RestaurantId != restaurantId)
         {
-            return null;
+            return ServiceResult<MenuCategoryResponse>.NotFound();
+        }
+
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return ServiceResult<MenuCategoryResponse>.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult<MenuCategoryResponse>.Forbidden();
         }
 
         var category = new MenuCategory
@@ -261,7 +320,7 @@ public class RestaurantAppService : IRestaurantAppService
         await _repository.AddMenuCategoryAsync(category);
         await _repository.SaveChangesAsync();
 
-        return new MenuCategoryResponse
+        return ServiceResult<MenuCategoryResponse>.Success(new MenuCategoryResponse
         {
             Id = category.Id,
             MenuId = category.MenuId,
@@ -271,23 +330,35 @@ public class RestaurantAppService : IRestaurantAppService
             DescriptionEn = category.DescriptionEn,
             DisplayOrder = category.DisplayOrder,
             IsActive = category.IsActive
-        };
+        });
     }
 
-    public async Task<MenuItemSummaryResponse?> CreateMenuItemAsync(Guid restaurantId, Guid menuId, Guid categoryId, CreateMenuItemRequest request)
+    public async Task<ServiceResult<MenuItemSummaryResponse>> CreateMenuItemAsync(Guid restaurantId, Guid menuId, Guid categoryId, CreateMenuItemRequest request, RequestingUser requestingUser)
     {
         var category = await _repository.GetMenuCategoryByIdAsync(categoryId);
 
         if (category is null || category.MenuId != menuId)
         {
-            return null;
+            return ServiceResult<MenuItemSummaryResponse>.NotFound();
         }
 
         var menu = await _repository.GetMenuByIdAsync(menuId);
 
         if (menu is null || menu.RestaurantId != restaurantId)
         {
-            return null;
+            return ServiceResult<MenuItemSummaryResponse>.NotFound();
+        }
+
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return ServiceResult<MenuItemSummaryResponse>.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult<MenuItemSummaryResponse>.Forbidden();
         }
 
         var item = new MenuItem
@@ -309,7 +380,7 @@ public class RestaurantAppService : IRestaurantAppService
         await _repository.AddMenuItemAsync(item);
         await _repository.SaveChangesAsync();
 
-        return new MenuItemSummaryResponse
+        return ServiceResult<MenuItemSummaryResponse>.Success(new MenuItemSummaryResponse
         {
             Id = item.Id,
             NameSr = item.NameSr,
@@ -317,7 +388,7 @@ public class RestaurantAppService : IRestaurantAppService
             Price = item.Price,
             ImageUrl = item.ImageUrl,
             IsAvailable = item.IsAvailable
-        };
+        });
     }
 
     private static RestaurantResponse MapToResponse(Restaurant restaurant)
