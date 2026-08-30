@@ -48,11 +48,23 @@ namespace Delivery.Tests
         }
 
         [Fact]
+        public void AdvanceStatus_MovesThroughReadyForPickup()
+        {
+            var delivery = CreateTestDelivery();
+            delivery.AdvanceStatus(); // Confirmed
+            delivery.AdvanceStatus(); // Preparing
+            delivery.AdvanceStatus(); // ReadyForPickup
+
+            Assert.Equal(DeliveryStatus.ReadyForPickup, delivery.Status);
+        }
+
+        [Fact]
         public void AdvanceStatus_AfterDelivered_ThrowsInvalidOperationException()
         {
             var delivery = CreateTestDelivery();
             delivery.AdvanceStatus(); // Confirmed
             delivery.AdvanceStatus(); // Preparing
+            delivery.AdvanceStatus(); // ReadyForPickup
             delivery.AdvanceStatus(); // OutForDelivery
             delivery.AdvanceStatus(); // Delivered
 
@@ -77,6 +89,7 @@ namespace Delivery.Tests
 
             delivery.AdvanceStatus(); // Confirmed
             delivery.AdvanceStatus(); // Preparing
+            delivery.AdvanceStatus(); // ReadyForPickup
             delivery.AdvanceStatus(); // OutForDelivery
             delivery.AdvanceStatus(); // Delivered
 
@@ -98,6 +111,7 @@ namespace Delivery.Tests
         public void Cancel_AfterDelivered_ThrowsInvalidOperationException()
         {
             var delivery = CreateTestDelivery();
+            delivery.AdvanceStatus();
             delivery.AdvanceStatus();
             delivery.AdvanceStatus();
             delivery.AdvanceStatus();
