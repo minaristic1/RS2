@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { RestaurantOrdersService } from '../services/restaurant-orders.service';
 import { RestaurantService } from '../../restaurants/services/restaurant.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { DeliveryOrder } from '../../delivery/models/delivery-order';
 import { Restaurant } from '../../restaurants/models/restaurant';
 
@@ -26,7 +27,8 @@ export class RestaurantOrdersComponent implements OnInit {
   loading = signal(true);
   error = signal(false);
   actionError = signal(false);
-  selectedRestaurantId = signal<string>(localStorage.getItem(STORAGE_KEY) ?? '');
+  selectedRestaurantId = signal<string>('');
+  lockedToOwnRestaurant = false;
 
   incomingOrders = computed(() =>
     this.deliveries().filter(
@@ -36,12 +38,26 @@ export class RestaurantOrdersComponent implements OnInit {
     )
   );
 
+  selectedRestaurantName = computed(
+    () => this.restaurants().find((r) => r.id === this.selectedRestaurantId())?.nameSr
+  );
+
   constructor(
     private restaurantOrdersService: RestaurantOrdersService,
-    private restaurantService: RestaurantService
+    private restaurantService: RestaurantService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    const ownRestaurantId = this.authService.currentUser()?.restaurantId;
+
+    if (ownRestaurantId) {
+      this.lockedToOwnRestaurant = true;
+      this.selectedRestaurantId.set(ownRestaurantId);
+    } else {
+      this.selectedRestaurantId.set(localStorage.getItem(STORAGE_KEY) ?? '');
+    }
+
     this.restaurantService.getAll().subscribe({
       next: (result) => this.restaurants.set(result),
       error: () => this.error.set(true)

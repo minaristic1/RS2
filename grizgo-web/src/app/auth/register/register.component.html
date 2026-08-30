@@ -1,47 +1,56 @@
-<div class="register-container">
-  <h2 class="mb-3">Registracija</h2>
+<div class="register-container d-flex justify-content-center">
+  <div class="card" style="max-width: 420px; width: 100%;">
+    <div class="card-body">
+      <h2 class="mb-1">Registracija</h2>
+      <p class="text-muted small mb-3">Napravi nalog i naruči hranu, ili se pridruži kao dostavljač.</p>
 
-  @if (success()) {
-    <div class="alert alert-success" style="max-width: 420px;">
-      Uspešno si se registrovala! <a routerLink="/login">Prijavi se</a>.
-    </div>
-  } @else {
-    <form (ngSubmit)="submit()" style="max-width: 420px;">
-      <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input class="form-control" type="email" [(ngModel)]="form.email" name="email" required />
-      </div>
+      @if (success()) {
+        <div class="alert alert-success">
+          Uspešno si se registrovala! <a routerLink="/login">Prijavi se</a>.
+        </div>
+      } @else {
+        <form (ngSubmit)="submit()">
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input class="form-control" type="email" [(ngModel)]="form.email" name="email" required />
+          </div>
 
-      <div class="mb-3">
-        <label class="form-label">Lozinka</label>
-        <input class="form-control" type="password" [(ngModel)]="form.password" name="password" required minlength="6" />
-      </div>
+          <div class="mb-3">
+            <label class="form-label">Lozinka</label>
+            <input class="form-control" type="password" [(ngModel)]="form.password" name="password" required minlength="6" />
+          </div>
 
-      <div class="mb-3">
-        <label class="form-label">Ime i prezime</label>
-        <input class="form-control" [(ngModel)]="form.fullName" name="fullName" required />
-      </div>
+          <div class="mb-3">
+            <label class="form-label">Ime i prezime</label>
+            <input class="form-control" [(ngModel)]="form.fullName" name="fullName" required />
+          </div>
 
-      <div class="mb-3">
-        <label class="form-label">Uloga</label>
-        <select class="form-select" [(ngModel)]="form.role" name="role">
-          @for (r of roles; track r.value) {
-            <option [value]="r.value">{{ r.label }}</option>
+          <div class="mb-3">
+            <label class="form-label">Uloga</label>
+            <select class="form-select" [(ngModel)]="form.role" name="role">
+              @for (r of roles; track r.value) {
+                <option [value]="r.value">{{ r.label }}</option>
+              }
+            </select>
+          </div>
+
+          @if (emailTaken()) {
+            <div class="alert alert-danger">Korisnik sa ovim email-om već postoji.</div>
           }
-        </select>
-      </div>
 
-      @if (emailTaken()) {
-        <div class="alert alert-danger">Korisnik sa ovim email-om već postoji.</div>
+          @if (error()) {
+            <div class="alert alert-danger">Došlo je do greške. Proveri podatke i pokušaj ponovo.</div>
+          }
+
+          <button type="submit" class="btn btn-primary w-100" [disabled]="saving()">
+            {{ saving() ? 'Registracija...' : 'Registruj se' }}
+          </button>
+
+          <p class="mt-3 small text-center mb-0">
+            Već imaš nalog? <a routerLink="/login">Prijavi se</a>
+          </p>
+        </form>
       }
-
-      @if (error()) {
-        <div class="alert alert-danger">Došlo je do greške. Proveri podatke i pokušaj ponovo.</div>
-      }
-
-      <button type="submit" class="btn btn-primary" [disabled]="saving()">
-        {{ saving() ? 'Registracija...' : 'Registruj se' }}
-      </button>
-    </form>
-  }
+    </div>
+  </div>
 </div>

@@ -1,12 +1,13 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { CartService } from '../services/cart.service';
 import { Cart } from '../models/cart';
 
 @Component({
   selector: 'app-cart-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cart-view.component.html',
   styleUrl: './cart-view.component.css'
 })
@@ -15,6 +16,8 @@ export class CartViewComponent implements OnInit {
   loading = signal(true);
   error = signal(false);
   actionError = signal(false);
+  deliveryAddress = '';
+  addressMissing = signal(false);
 
   constructor(private cartService: CartService) {}
 
@@ -66,9 +69,18 @@ export class CartViewComponent implements OnInit {
   }
 
   checkout(): void {
+    if (!this.deliveryAddress.trim()) {
+      this.addressMissing.set(true);
+      return;
+    }
+
+    this.addressMissing.set(false);
     this.actionError.set(false);
-    this.cartService.checkout().subscribe({
-      next: () => this.loadCart(),
+    this.cartService.checkout(this.deliveryAddress).subscribe({
+      next: () => {
+        this.deliveryAddress = '';
+        this.loadCart();
+      },
       error: () => this.actionError.set(true)
     });
   }

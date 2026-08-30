@@ -1,22 +1,32 @@
 <div class="restaurant-orders-container">
   <h2 class="mb-3">Porudžbine restorana</h2>
 
-  <div class="mb-4" style="max-width: 360px;">
-    <label class="form-label">Ja sam:</label>
-    <select
-      class="form-select"
-      [ngModel]="selectedRestaurantId()"
-      (ngModelChange)="onRestaurantChange($event)"
-    >
-      <option value="">-- izaberi restoran --</option>
-      @for (r of restaurants(); track r.id) {
-        <option [value]="r.id">{{ r.nameSr }}</option>
-      }
-    </select>
-  </div>
+  @if (lockedToOwnRestaurant) {
+    <p class="text-muted mb-4">
+      Upravljaš restoranom: <strong>{{ selectedRestaurantName() }}</strong>
+    </p>
+  } @else {
+    <div class="mb-4" style="max-width: 360px;">
+      <label class="form-label">Ja sam:</label>
+      <select
+        class="form-select"
+        [ngModel]="selectedRestaurantId()"
+        (ngModelChange)="onRestaurantChange($event)"
+      >
+        <option value="">-- izaberi restoran --</option>
+        @for (r of restaurants(); track r.id) {
+          <option [value]="r.id">{{ r.nameSr }}</option>
+        }
+      </select>
+      <small class="text-muted">(privremeno, dok nalozi ne budu vezani za restoran)</small>
+    </div>
+  }
 
   @if (selectedRestaurantId()) {
-    <a [routerLink]="['/restaurants', selectedRestaurantId(), 'edit']" class="btn btn-outline-secondary btn-sm mb-4">Izmeni podatke restorana</a>
+    <div class="d-flex gap-2 mb-4">
+      <a [routerLink]="['/restaurants', selectedRestaurantId(), 'edit']" class="btn btn-outline-secondary btn-sm">Izmeni podatke restorana</a>
+      <a [routerLink]="['/restaurants', selectedRestaurantId(), 'menu-manage']" class="btn btn-outline-secondary btn-sm">Upravljaj menijem</a>
+    </div>
   }
 
   @if (loading()) {

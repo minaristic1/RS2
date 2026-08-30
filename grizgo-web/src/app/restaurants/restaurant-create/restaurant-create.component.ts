@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { RestaurantService } from '../services/restaurant.service';
 
+const DEFAULT_IMAGE_URL = 'https://placehold.co/300x200?text=GrizGo';
+
 const CUISINE_TYPES = [
   'Italijanska',
   'Srpska',
@@ -78,8 +80,10 @@ export class RestaurantCreateComponent implements OnInit {
     this.saving.set(true);
     this.error.set(false);
 
+    const payload = { ...this.form, imageUrl: this.form.imageUrl.trim() || DEFAULT_IMAGE_URL };
+
     if (this.editId) {
-      this.restaurantService.update(this.editId, this.form).subscribe({
+      this.restaurantService.update(this.editId, payload).subscribe({
         next: () => {
           this.saving.set(false);
           this.router.navigate(['/restaurants', this.editId]);
@@ -92,7 +96,7 @@ export class RestaurantCreateComponent implements OnInit {
       return;
     }
 
-    this.restaurantService.create(this.form).subscribe({
+    this.restaurantService.create(payload).subscribe({
       next: (result) => {
         this.saving.set(false);
         this.router.navigate(['/restaurants', result.id]);

@@ -26,7 +26,7 @@ export class CartService {
     return this.http.delete<Cart>(`${this.baseUrl}/${this.session.getUserId()}/items/${productId}`);
   }
 
-  checkout(): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/${this.session.getUserId()}/checkout`, {});
+  checkout(deliveryAddress: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${this.session.getUserId()}/checkout`, { deliveryAddress });
   }
 }

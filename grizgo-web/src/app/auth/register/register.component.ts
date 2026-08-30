@@ -6,10 +6,7 @@ import { AuthService } from '../services/auth.service';
 
 const ROLES = [
   { value: 'Customer', label: 'Kupac' },
-  { value: 'RestaurantOwner', label: 'Vlasnik restorana' },
-  { value: 'RestaurantEmployee', label: 'Zaposleni u restoranu' },
-  { value: 'Driver', label: 'Dostavljač' },
-  { value: 'Admin', label: 'Admin' }
+  { value: 'Driver', label: 'Dostavljač' }
 ];
 
 @Component({

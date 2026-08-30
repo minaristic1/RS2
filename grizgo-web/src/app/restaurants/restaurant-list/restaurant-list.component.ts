@@ -1,9 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RestaurantService } from '../services/restaurant.service';
 import { Restaurant } from '../models/restaurant';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-restaurant-list',
@@ -17,11 +18,28 @@ export class RestaurantListComponent implements OnInit {
   loading = signal(true);
   error = signal(false);
   searchTerm = '';
+  selectedCuisine = '';
 
-  constructor(private restaurantService: RestaurantService) {}
+  cuisineOptions = computed(() => {
+    const types = this.restaurants().map((r) => r.cuisineType).filter((c) => !!c);
+    return Array.from(new Set(types)).sort();
+  });
+
+  filteredRestaurants(): Restaurant[] {
+    if (!this.selectedCuisine) {
+      return this.restaurants();
+    }
+    return this.restaurants().filter((r) => r.cuisineType === this.selectedCuisine);
+  }
+
+  constructor(private restaurantService: RestaurantService, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.loadAll();
+  }
+
+  isAdmin(): boolean {
+    return this.authService.currentUser()?.role === 'Admin';
   }
 
   loadAll(): void {

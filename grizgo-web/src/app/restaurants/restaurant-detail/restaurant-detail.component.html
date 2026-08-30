@@ -54,6 +54,7 @@
           }
 
           @for (category of menuList()!.menus[activeMenuIndex()].categories; track category.id) {
+            @if (category.items.length > 0) {
             <h4 class="h6 mt-3">{{ category.nameSr }}</h4>
             <ul class="list-group mb-3">
               @for (item of category.items; track item.id) {
@@ -75,6 +76,7 @@
                 </li>
               }
             </ul>
+            }
           }
         } @else {
           <p class="text-muted">Meni još nije dodat za ovaj restoran.</p>

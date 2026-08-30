@@ -1,5 +1,6 @@
 <div class="cart-container">
-  <h2 class="mb-3">Moja korpa</h2>
+  <h2 class="mb-1">Moja korpa</h2>
+  <p class="text-muted small mb-3">Proveri svoju porudžbinu i unesi adresu pre nego što je pošalješ restoranu.</p>
 
   @if (loading()) {
     <p>Učitavanje...</p>
@@ -35,6 +36,15 @@
       </ul>
 
       <p class="cart-total"><strong>Ukupno: {{ c.totalPrice }} RSD</strong></p>
+
+      <div class="mb-3" style="max-width: 400px;">
+        <label class="form-label">Adresa dostave</label>
+        <input class="form-control" [(ngModel)]="deliveryAddress" placeholder="Unesi adresu dostave" />
+        @if (addressMissing()) {
+          <small class="text-danger">Adresa dostave je obavezna.</small>
+        }
+      </div>
+
       <button class="btn btn-accent" (click)="checkout()">Naruči</button>
     }
   }

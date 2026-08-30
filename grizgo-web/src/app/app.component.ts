@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { SessionService } from './shared/session/session.service';
 import { AuthService } from './auth/services/auth.service';
 
@@ -17,7 +17,8 @@ export class AppComponent {
 
   constructor(
     private sessionService: SessionService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {
     this.guestIdShort = this.sessionService.getUserId().slice(0, 8);
   }
@@ -28,5 +29,6 @@ export class AppComponent {
 
   logout(): void {
     this.authService.logout();
+    this.router.navigate(['/restaurants']);
   }
 }

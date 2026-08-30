@@ -28,6 +28,14 @@ export interface LoginResponse {
   user: UserResponse;
 }
 
+export interface CreateStaffRequest {
+  email: string;
+  password: string;
+  fullName: string;
+  role: string;
+  restaurantId: string;
+}
+
 const TOKEN_KEY = 'grizgo-auth-token';
 const USER_KEY = 'grizgo-auth-user';
 
@@ -51,6 +59,10 @@ export class AuthService {
         this.currentUser.set(result.user);
       })
     );
+  }
+
+  createStaff(request: CreateStaffRequest): Observable<UserResponse> {
+    return this.http.post<UserResponse>(`${this.baseUrl}/admin/staff`, request);
   }
 
   logout(): void {
