@@ -47,4 +47,12 @@ public interface IRestaurantRepository
     Task DeleteMenuAsync(Guid menuId);
 
     Task DeleteMenuCategoryAsync(Guid categoryId);
+
+    Task<List<RestaurantHolidayException>> GetHolidayExceptionsByRestaurantIdAsync(Guid restaurantId);
+
+    Task<RestaurantHolidayException?> GetHolidayExceptionByIdAsync(Guid id);
+
+    Task AddHolidayExceptionAsync(RestaurantHolidayException exception);
+
+    Task DeleteHolidayExceptionAsync(Guid id);
 }

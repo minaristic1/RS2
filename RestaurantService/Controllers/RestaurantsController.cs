@@ -212,4 +212,45 @@ public class RestaurantsController : ControllerBase
             _ => NoContent()
         };
     }
+
+    [HttpGet("{restaurantId:guid}/holiday-exceptions")]
+    public async Task<ActionResult<List<HolidayExceptionResponse>>> GetHolidayExceptions(Guid restaurantId)
+    {
+        var exceptions = await _restaurantAppService.GetHolidayExceptionsAsync(restaurantId);
+
+        if (exceptions is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(exceptions);
+    }
+
+    [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
+    [HttpPost("{restaurantId:guid}/holiday-exceptions")]
+    public async Task<ActionResult<HolidayExceptionResponse>> CreateHolidayException(Guid restaurantId, [FromBody] CreateHolidayExceptionRequest request)
+    {
+        var result = await _restaurantAppService.CreateHolidayExceptionAsync(restaurantId, request, User.ToRequestingUser());
+
+        return result.Status switch
+        {
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => StatusCode(StatusCodes.Status201Created, result.Value)
+        };
+    }
+
+    [Authorize(Roles = "RestaurantOwner,RestaurantEmployee,Admin")]
+    [HttpDelete("{restaurantId:guid}/holiday-exceptions/{exceptionId:guid}")]
+    public async Task<IActionResult> DeleteHolidayException(Guid restaurantId, Guid exceptionId)
+    {
+        var result = await _restaurantAppService.DeleteHolidayExceptionAsync(restaurantId, exceptionId, User.ToRequestingUser());
+
+        return result.Status switch
+        {
+            ServiceStatus.NotFound => NotFound(),
+            ServiceStatus.Forbidden => Forbid(),
+            _ => NoContent()
+        };
+    }
 }

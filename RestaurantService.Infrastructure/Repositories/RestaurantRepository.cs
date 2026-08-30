@@ -168,4 +168,34 @@ public class RestaurantRepository : IRestaurantRepository
             _context.MenuCategories.Remove(category);
         }
     }
+
+    public async Task<List<RestaurantHolidayException>> GetHolidayExceptionsByRestaurantIdAsync(Guid restaurantId)
+    {
+        return await _context.RestaurantHolidayExceptions
+            .AsNoTracking()
+            .Where(exception => exception.RestaurantId == restaurantId)
+            .OrderBy(exception => exception.Date)
+            .ToListAsync();
+    }
+
+    public async Task<RestaurantHolidayException?> GetHolidayExceptionByIdAsync(Guid id)
+    {
+        return await _context.RestaurantHolidayExceptions
+            .FirstOrDefaultAsync(exception => exception.Id == id);
+    }
+
+    public async Task AddHolidayExceptionAsync(RestaurantHolidayException exception)
+    {
+        await _context.RestaurantHolidayExceptions.AddAsync(exception);
+    }
+
+    public async Task DeleteHolidayExceptionAsync(Guid id)
+    {
+        var exception = await _context.RestaurantHolidayExceptions.FindAsync(id);
+
+        if (exception is not null)
+        {
+            _context.RestaurantHolidayExceptions.Remove(exception);
+        }
+    }
 }

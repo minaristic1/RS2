@@ -545,6 +545,92 @@ public class RestaurantAppService : IRestaurantAppService
         return ServiceResult.Success();
     }
 
+    public async Task<List<HolidayExceptionResponse>?> GetHolidayExceptionsAsync(Guid restaurantId)
+    {
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return null;
+        }
+
+        var exceptions = await _repository.GetHolidayExceptionsByRestaurantIdAsync(restaurantId);
+
+        return exceptions.Select(MapToHolidayExceptionResponse).ToList();
+    }
+
+    public async Task<ServiceResult<HolidayExceptionResponse>> CreateHolidayExceptionAsync(Guid restaurantId, CreateHolidayExceptionRequest request, RequestingUser requestingUser)
+    {
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return ServiceResult<HolidayExceptionResponse>.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult<HolidayExceptionResponse>.Forbidden();
+        }
+
+        var exception = new RestaurantHolidayException
+        {
+            Id = Guid.NewGuid(),
+            RestaurantId = restaurantId,
+            Date = request.Date,
+            IsClosed = request.IsClosed,
+            OpenTime = string.IsNullOrWhiteSpace(request.OpenTime) ? null : TimeSpan.Parse(request.OpenTime),
+            CloseTime = string.IsNullOrWhiteSpace(request.CloseTime) ? null : TimeSpan.Parse(request.CloseTime),
+            Reason = request.Reason
+        };
+
+        await _repository.AddHolidayExceptionAsync(exception);
+        await _repository.SaveChangesAsync();
+
+        return ServiceResult<HolidayExceptionResponse>.Success(MapToHolidayExceptionResponse(exception));
+    }
+
+    public async Task<ServiceResult> DeleteHolidayExceptionAsync(Guid restaurantId, Guid exceptionId, RequestingUser requestingUser)
+    {
+        var exception = await _repository.GetHolidayExceptionByIdAsync(exceptionId);
+
+        if (exception is null || exception.RestaurantId != restaurantId)
+        {
+            return ServiceResult.NotFound();
+        }
+
+        var restaurant = await _repository.GetByIdAsync(restaurantId);
+
+        if (restaurant is null)
+        {
+            return ServiceResult.NotFound();
+        }
+
+        if (!requestingUser.CanManageRestaurant(restaurant.Id, restaurant.OwnerId))
+        {
+            return ServiceResult.Forbidden();
+        }
+
+        await _repository.DeleteHolidayExceptionAsync(exceptionId);
+        await _repository.SaveChangesAsync();
+
+        return ServiceResult.Success();
+    }
+
+    private static HolidayExceptionResponse MapToHolidayExceptionResponse(RestaurantHolidayException exception)
+    {
+        return new HolidayExceptionResponse
+        {
+            Id = exception.Id,
+            RestaurantId = exception.RestaurantId,
+            Date = exception.Date,
+            IsClosed = exception.IsClosed,
+            OpenTime = exception.OpenTime?.ToString(@"hh\:mm"),
+            CloseTime = exception.CloseTime?.ToString(@"hh\:mm"),
+            Reason = exception.Reason
+        };
+    }
+
     private static RestaurantResponse MapToResponse(Restaurant restaurant)
     {
         return new RestaurantResponse

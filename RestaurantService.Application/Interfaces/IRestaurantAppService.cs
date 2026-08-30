@@ -47,4 +47,10 @@ public interface IRestaurantAppService
     Task<ServiceResult<MenuCategoryResponse>> UpdateMenuCategoryAsync(Guid restaurantId, Guid menuId, Guid categoryId, UpdateMenuCategoryRequest request, RequestingUser requestingUser);
 
     Task<ServiceResult> DeleteMenuCategoryAsync(Guid restaurantId, Guid menuId, Guid categoryId, RequestingUser requestingUser);
+
+    Task<List<HolidayExceptionResponse>?> GetHolidayExceptionsAsync(Guid restaurantId);
+
+    Task<ServiceResult<HolidayExceptionResponse>> CreateHolidayExceptionAsync(Guid restaurantId, CreateHolidayExceptionRequest request, RequestingUser requestingUser);
+
+    Task<ServiceResult> DeleteHolidayExceptionAsync(Guid restaurantId, Guid exceptionId, RequestingUser requestingUser);
 }

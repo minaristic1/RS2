@@ -350,6 +350,47 @@
       }
     },
     {
+      "DownstreamPathTemplate": "/api/restaurants/{restaurantId}/holiday-exceptions",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5056
+        }
+      ],
+      "UpstreamPathTemplate": "/api/restaurants/{restaurantId}/holiday-exceptions",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
+    },
+    {
+      "DownstreamPathTemplate": "/api/restaurants/{restaurantId}/holiday-exceptions/{exceptionId}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5056
+        }
+      ],
+      "UpstreamPathTemplate": "/api/restaurants/{restaurantId}/holiday-exceptions/{exceptionId}",
+      "UpstreamHttpMethod": [
+        "DELETE"
+      ],
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "10s",
+        "PeriodTimespan": 10,
+        "Limit": 20
+      }
+    },
+    {
       "DownstreamPathTemplate": "/api/menu-items/{id}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
