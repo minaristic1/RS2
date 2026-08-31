@@ -1,0 +1,123 @@
+<div class="restaurant-detail-container">
+  <a routerLink="/restaurants" class="btn btn-outline-secondary btn-sm mb-3">&larr; Nazad na restorane</a>
+
+  @if (loading()) {
+    <p>Učitavanje...</p>
+  }
+
+  @if (notFound()) {
+    <div class="alert alert-danger">Restoran nije pronađen.</div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">Trenutno ne možemo da učitamo restoran. Proveri da li je servis pokrenut.</div>
+  }
+
+  @if (restaurant(); as r) {
+    <div class="card mx-auto" style="max-width: 900px;">
+      @if (r.imageUrl) {
+        <img [src]="r.imageUrl" class="card-img-top" [alt]="r.nameSr" style="height: 320px; object-fit: cover;">
+      }
+      <div class="card-body">
+        <h2 class="card-title">{{ r.nameSr }}</h2>
+        <span class="badge bg-primary mb-2">{{ r.cuisineType }}</span>
+        <p class="text-muted mb-1">
+          {{ r.address }}
+          @if (r.isOpenNow) {
+            <span class="badge bg-success ms-1">Otvoreno sada</span>
+          } @else {
+            <span class="badge bg-secondary ms-1">Zatvoreno</span>
+          }
+        </p>
+        <p>{{ r.descriptionSr }}</p>
+        <hr>
+        <h3 class="h5">Meni</h3>
+
+        @if (menuLoading()) {
+          <p class="text-muted">Učitavanje menija...</p>
+        } @else if (menuError()) {
+          <div class="alert alert-danger">Trenutno ne možemo da učitamo meni. Proveri da li je servis pokrenut.</div>
+        } @else if (menuList() && menuList()!.menus.length > 0) {
+          @if (menuList()!.menus.length > 1) {
+            <ul class="nav nav-tabs mb-3">
+              @for (menu of menuList()!.menus; track menu.menuId; let i = $index) {
+                <li class="nav-item">
+                  <button
+                    type="button"
+                    class="nav-link"
+                    [class.active]="i === activeMenuIndex()"
+                    (click)="activeMenuIndex.set(i)"
+                  >{{ menu.nameSr }}</button>
+                </li>
+              }
+            </ul>
+          }
+
+          @for (category of menuList()!.menus[activeMenuIndex()].categories; track category.id) {
+            @if (category.items.length > 0) {
+            <h4 class="h6 mt-3">{{ category.nameSr }}</h4>
+            <ul class="list-group mb-3">
+              @for (item of category.items; track item.id) {
+                <li
+                  class="list-group-item d-flex justify-content-between align-items-center"
+                  style="cursor: pointer;"
+                  (click)="openItem(item)"
+                >
+                  <div class="d-flex align-items-center gap-2">
+                    @if (item.imageUrl) {
+                      <img [src]="item.imageUrl" [alt]="item.nameSr" style="width: 56px; height: 56px; object-fit: cover; border-radius: 6px;">
+                    }
+                    <div>
+                      <div>{{ item.nameSr }}</div>
+                      <small class="text-muted">{{ item.descriptionSr }}</small>
+                    </div>
+                  </div>
+                  <span>{{ item.price }} RSD</span>
+                </li>
+              }
+            </ul>
+            }
+          }
+        } @else {
+          <p class="text-muted">Meni još nije dodat za ovaj restoran.</p>
+        }
+      </div>
+    </div>
+  }
+
+  @if (selectedItem(); as item) {
+    <div class="modal-backdrop-custom" (click)="closeItem()">
+      <div class="card" style="max-width: 420px; width: 90%;" (click)="$event.stopPropagation()">
+        @if (item.imageUrl) {
+          <img [src]="item.imageUrl" class="card-img-top" [alt]="item.nameSr" style="height: 180px; object-fit: cover;">
+        }
+        <div class="card-body">
+          <button type="button" class="btn-close float-end" aria-label="Zatvori" (click)="closeItem()"></button>
+          <h4 class="card-title">{{ item.nameSr }}</h4>
+          <p class="text-muted">{{ item.descriptionSr }}</p>
+          <p><strong>{{ item.price }} RSD</strong></p>
+
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-secondary" (click)="decreaseQuantity()">-</button>
+              <span class="btn btn-outline-secondary disabled">{{ selectedQuantity() }}</span>
+              <button class="btn btn-outline-secondary" (click)="increaseQuantity()">+</button>
+            </div>
+            <span class="text-muted">Ukupno: {{ item.price * selectedQuantity() }} RSD</span>
+          </div>
+
+          @if (addedConfirmation()) {
+            <div class="alert alert-success py-2">Dodato u korpu!</div>
+          } @else {
+            @if (addToCartError()) {
+              <div class="alert alert-danger py-2">Nije uspelo dodavanje u korpu. Pokušaj ponovo.</div>
+            }
+            <button class="btn btn-accent w-100" [disabled]="addingToCart()" (click)="addToCart()">
+              {{ addingToCart() ? 'Dodavanje...' : 'Dodaj u korpu' }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

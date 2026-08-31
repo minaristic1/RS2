@@ -7,6 +7,7 @@ using Billing.Application.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Billing.API.Controllers;
 
@@ -22,9 +23,10 @@ public sealed class InvoicesController(ISender sender) : ControllerBase
         CreateInvoiceRequest request,
         CancellationToken cancellationToken)
     {
+        var customerId = GetCurrentUserId();
         var command = new CreateInvoiceCommand(
             request.OrderId,
-            request.CustomerId,
+            customerId,
             request.Currency,
             request.Items.Select(item => new CreateInvoiceItem(
                 item.ProductId,
@@ -44,7 +46,8 @@ public sealed class InvoicesController(ISender sender) : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
-        return Ok(await sender.Send(new GetInvoiceQuery(id), cancellationToken));
+        var invoice = await sender.Send(new GetInvoiceQuery(id), cancellationToken);
+        return CanAccess(invoice.CustomerId) ? Ok(invoice) : Forbid();
     }
 
     [HttpGet("customer/{customerId:guid}")]
@@ -53,6 +56,11 @@ public sealed class InvoicesController(ISender sender) : ControllerBase
         Guid customerId,
         CancellationToken cancellationToken)
     {
+        if (!CanAccess(customerId))
+        {
+            return Forbid();
+        }
+
         return Ok(await sender.Send(
             new GetCustomerInvoicesQuery(customerId),
             cancellationToken));
@@ -67,6 +75,12 @@ public sealed class InvoicesController(ISender sender) : ControllerBase
         PayInvoiceRequest request,
         CancellationToken cancellationToken)
     {
+        var invoice = await sender.Send(new GetInvoiceQuery(id), cancellationToken);
+        if (!CanAccess(invoice.CustomerId))
+        {
+            return Forbid();
+        }
+
         var payment = await sender.Send(
             new PayInvoiceCommand(
                 id,
@@ -76,5 +90,18 @@ public sealed class InvoicesController(ISender sender) : ControllerBase
             cancellationToken);
 
         return Ok(payment);
+    }
+
+    private Guid GetCurrentUserId()
+    {
+        var value = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return Guid.TryParse(value, out var userId)
+            ? userId
+            : throw new UnauthorizedAccessException("Authenticated user identifier is invalid.");
+    }
+
+    private bool CanAccess(Guid customerId)
+    {
+        return User.IsInRole("Admin") || GetCurrentUserId() == customerId;
     }
 }

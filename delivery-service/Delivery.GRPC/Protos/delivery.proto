@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "Delivery.GRPC.Protos";
+
+package delivery;
+
+service DeliveryGrpcService {
+  rpc GetDeliveryStatus (DeliveryStatusRequest) returns (DeliveryStatusResponse);
+}
+
+message DeliveryStatusRequest {
+  string delivery_id = 1;
+}
+
+message DeliveryStatusResponse {
+  string delivery_id = 1;
+  DeliveryStatus status = 2;
+  string delivery_address = 3;
+}
+
+enum DeliveryStatus {
+  CREATED = 0;
+  CONFIRMED = 1;
+  PREPARING = 2;
+  OUT_FOR_DELIVERY = 3;
+  DELIVERED = 4;
+  CANCELLED = 5;
+}

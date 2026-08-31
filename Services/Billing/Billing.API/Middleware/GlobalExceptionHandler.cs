@@ -18,6 +18,7 @@ public sealed class GlobalExceptionHandler(
         {
             NotFoundException => (StatusCodes.Status404NotFound, "Resource not found"),
             BillingDomainException => (StatusCodes.Status400BadRequest, "Invalid billing operation"),
+            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Invalid authentication"),
             _ => (StatusCodes.Status500InternalServerError, "Unexpected server error")
         };
 
@@ -45,4 +46,3 @@ public sealed class GlobalExceptionHandler(
         });
     }
 }
-

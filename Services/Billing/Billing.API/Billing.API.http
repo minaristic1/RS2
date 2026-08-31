@@ -5,7 +5,6 @@ Content-Type: application/json
 
 {
   "orderId": "5be9d604-f4fc-4f29-b9db-a23eb440d339",
-  "customerId": "b3fae20f-2afd-4796-af05-c5fa52d48c86",
   "currency": "RSD",
   "items": [
     {

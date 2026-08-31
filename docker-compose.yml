@@ -1,4 +1,68 @@
 services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SQLSERVER_SA_PASSWORD:-YourStrong@Passw0rd}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" -b -o /dev/null"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-grizgo}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-grizgo123}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  delivery-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: delivery
+      POSTGRES_PASSWORD: ${DELIVERY_DB_PASSWORD:-delivery}
+      POSTGRES_DB: delivery
+    ports:
+      - "5435:5432"
+    volumes:
+      - delivery-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U delivery -d delivery"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   billing-db:
     image: postgres:17-alpine
     environment:
@@ -15,21 +79,98 @@ services:
       timeout: 5s
       retries: 10
 
-  identity-db:
-    image: postgres:17-alpine
+  user-api:
+    build:
+      context: .
+      dockerfile: UserService/Dockerfile
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: grizgo_identity
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__UserDb: Server=sqlserver;Database=UserDb;User Id=sa;Password=${SQLSERVER_SA_PASSWORD:-YourStrong@Passw0rd};TrustServerCertificate=True
+      Jwt__Key: ${JWT_SIGNING_KEY:-GrizGo-Super-Tajni-Kljuc-Za-Seminarski-2026-Ilinka}
+      Jwt__Issuer: GrizGo.UserService
+      Jwt__Audience: GrizGo
     ports:
-      - "5434:5432"
-    volumes:
-      - identity-db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d grizgo_identity"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      - "5238:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  restaurant-api:
+    build:
+      context: .
+      dockerfile: RestaurantService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__RestaurantDb: Server=sqlserver;Database=RestaurantDb;User Id=sa;Password=${SQLSERVER_SA_PASSWORD:-YourStrong@Passw0rd};TrustServerCertificate=True
+      Jwt__Key: ${JWT_SIGNING_KEY:-GrizGo-Super-Tajni-Kljuc-Za-Seminarski-2026-Ilinka}
+      Jwt__Issuer: GrizGo.UserService
+      Jwt__Audience: GrizGo
+    ports:
+      - "5056:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  cart-service:
+    build:
+      context: .
+      dockerfile: CartService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Redis: redis:6379
+      Services__RestaurantService: http://restaurant-api:8080/
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: 5672
+      RabbitMq__Username: ${RABBITMQ_USER:-grizgo}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:-grizgo123}
+      Jwt__Key: ${JWT_SIGNING_KEY:-GrizGo-Super-Tajni-Kljuc-Za-Seminarski-2026-Ilinka}
+      Jwt__Issuer: GrizGo.UserService
+      Jwt__Audience: GrizGo
+    ports:
+      - "5205:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      restaurant-api:
+        condition: service_started
+
+  delivery-api:
+    build:
+      context: ./delivery-service
+      dockerfile: Delivery.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DeliveryDb: Host=delivery-db;Port=5432;Database=delivery;Username=delivery;Password=${DELIVERY_DB_PASSWORD:-delivery}
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: 5672
+      RabbitMq__Username: ${RABBITMQ_USER:-grizgo}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:-grizgo123}
+    ports:
+      - "5121:8080"
+    depends_on:
+      delivery-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  delivery-grpc:
+    build:
+      context: ./delivery-service
+      dockerfile: Delivery.GRPC/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DeliveryDb: Host=delivery-db;Port=5432;Database=delivery;Username=delivery;Password=${DELIVERY_DB_PASSWORD:-delivery}
+    ports:
+      - "5261:8081"
+    depends_on:
+      delivery-db:
+        condition: service_healthy
 
   billing-api:
     build:
@@ -38,31 +179,20 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__BillingConnection: Host=billing-db;Port=5432;Database=grizgo_billing;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
-      Jwt__Issuer: GrizGo.Identity
-      Jwt__Audience: GrizGo.Services
-      Jwt__Key: ${JWT_SIGNING_KEY:-development-only-signing-key-change-before-production-2026}
+      Jwt__Key: ${JWT_SIGNING_KEY:-GrizGo-Super-Tajni-Kljuc-Za-Seminarski-2026-Ilinka}
+      Jwt__Issuer: GrizGo.UserService
+      Jwt__Audience: GrizGo
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Port: 5672
+      RabbitMq__Username: ${RABBITMQ_USER:-grizgo}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:-grizgo123}
     ports:
       - "5005:5005"
       - "5001:5001"
     depends_on:
       billing-db:
         condition: service_healthy
-
-  identity-api:
-    build:
-      context: .
-      dockerfile: Security/IdentityServer/Dockerfile
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__IdentityConnection: Host=identity-db;Port=5432;Database=grizgo_identity;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
-      Jwt__Issuer: GrizGo.Identity
-      Jwt__Audience: GrizGo.Services
-      Jwt__Key: ${JWT_SIGNING_KEY:-development-only-signing-key-change-before-production-2026}
-    ports:
-      - "5100:8080"
-    depends_on:
-      identity-db:
+      rabbitmq:
         condition: service_healthy
 
   api-gateway:
@@ -72,13 +202,22 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      OcelotConfigurationFile: ocelot.Docker.json
+      UseDockerServiceDiscovery: "true"
+      Jwt__Key: ${JWT_SIGNING_KEY:-GrizGo-Super-Tajni-Kljuc-Za-Seminarski-2026-Ilinka}
+      Jwt__Issuer: GrizGo.UserService
+      Jwt__Audience: GrizGo
     ports:
       - "5029:8080"
     depends_on:
+      - user-api
+      - restaurant-api
+      - cart-service
+      - delivery-api
       - billing-api
-      - identity-api
 
 volumes:
+  sqlserver-data:
+  redis-data:
+  rabbitmq-data:
+  delivery-db-data:
   billing-db-data:
-  identity-db-data:

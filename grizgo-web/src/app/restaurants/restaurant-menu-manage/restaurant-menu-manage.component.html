@@ -1,0 +1,114 @@
+<div class="menu-manage-container">
+  <a [routerLink]="['/restaurants', restaurantId]" class="btn btn-outline-secondary btn-sm mb-3">&larr; Nazad na restoran</a>
+
+  <h2 class="mb-3">
+    Upravljanje menijem
+    @if (restaurant(); as r) {
+      <span class="text-muted">— {{ r.nameSr }}</span>
+    }
+  </h2>
+
+  @if (loading()) {
+    <p>Učitavanje...</p>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">Došlo je do greške. Proveri da li si prijavljena kao vlasnik/zaposleni ovog restorana.</div>
+  }
+
+  @if (menuList(); as ml) {
+    @for (menu of ml.menus; track menu.menuId) {
+      <div class="card mb-4">
+        <div class="card-body">
+          <h3 class="h5">{{ menu.nameSr }}</h3>
+
+          @for (category of menu.categories; track category.id) {
+            <div class="mb-3 ps-3 border-start">
+              <h4 class="h6">{{ category.nameSr }}</h4>
+
+              <ul class="list-group mb-2">
+                @for (item of category.items; track item.id) {
+                  <li class="list-group-item">
+                    @if (editingItemId() === item.id) {
+                      <div class="row g-2">
+                        <div class="col-6"><input class="form-control form-control-sm" [(ngModel)]="editItemForm.nameSr" placeholder="Naziv" /></div>
+                        <div class="col-3"><input class="form-control form-control-sm" type="number" [(ngModel)]="editItemForm.price" placeholder="Cena" /></div>
+                        <div class="col-12"><input class="form-control form-control-sm" [(ngModel)]="editItemForm.descriptionSr" placeholder="Opis" /></div>
+                        <div class="col-12"><input class="form-control form-control-sm" [(ngModel)]="editItemForm.imageUrl" placeholder="Slika URL" /></div>
+                        <div class="col-12 d-flex gap-2">
+                          <button class="btn btn-primary btn-sm" [disabled]="saving()" (click)="submitEditItem(item.id)">Sačuvaj</button>
+                          <button class="btn btn-outline-secondary btn-sm" (click)="editingItemId.set(null)">Otkaži</button>
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <strong>{{ item.nameSr }}</strong> — {{ item.price }} RSD
+                          @if (!item.isAvailable) {
+                            <span class="badge bg-secondary ms-1">Nedostupno</span>
+                          }
+                          <div class="small text-muted">{{ item.descriptionSr }}</div>
+                        </div>
+                        <div class="d-flex gap-1">
+                          <button class="btn btn-outline-secondary btn-sm" (click)="toggleAvailability(item)">
+                            {{ item.isAvailable ? 'Označi nedostupno' : 'Označi dostupno' }}
+                          </button>
+                          <button class="btn btn-outline-primary btn-sm" (click)="openEditItem(item)">Izmeni</button>
+                          <button class="btn btn-outline-danger btn-sm" (click)="deleteItem(item.id)">Obriši</button>
+                        </div>
+                      </div>
+                    }
+                  </li>
+                }
+              </ul>
+
+              @if (addItemForCategoryId() === category.id) {
+                <div class="card card-body bg-light mb-2">
+                  <div class="row g-2">
+                    <div class="col-6"><input class="form-control form-control-sm" [(ngModel)]="newItemForm.nameSr" placeholder="Naziv (sr)" /></div>
+                    <div class="col-6"><input class="form-control form-control-sm" [(ngModel)]="newItemForm.nameEn" placeholder="Naziv (en)" /></div>
+                    <div class="col-3"><input class="form-control form-control-sm" type="number" [(ngModel)]="newItemForm.price" placeholder="Cena" /></div>
+                    <div class="col-9"><input class="form-control form-control-sm" [(ngModel)]="newItemForm.imageUrl" placeholder="Slika URL" /></div>
+                    <div class="col-12"><input class="form-control form-control-sm" [(ngModel)]="newItemForm.descriptionSr" placeholder="Opis" /></div>
+                    <div class="col-12 d-flex gap-2">
+                      <button class="btn btn-primary btn-sm" [disabled]="saving()" (click)="submitNewItem(category.id)">Dodaj stavku</button>
+                      <button class="btn btn-outline-secondary btn-sm" (click)="addItemForCategoryId.set(null)">Otkaži</button>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <button class="btn btn-outline-primary btn-sm" (click)="openAddItem(menu.menuId, category.id)">+ Dodaj stavku</button>
+              }
+            </div>
+          }
+
+          @if (addCategoryForMenuId() === menu.menuId) {
+            <div class="card card-body bg-light mb-2" style="max-width: 400px;">
+              <input class="form-control form-control-sm mb-2" [(ngModel)]="newCategoryForm.nameSr" placeholder="Naziv kategorije (sr)" />
+              <input class="form-control form-control-sm mb-2" [(ngModel)]="newCategoryForm.nameEn" placeholder="Naziv kategorije (en)" />
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-sm" [disabled]="saving()" (click)="submitNewCategory(menu.menuId)">Dodaj kategoriju</button>
+                <button class="btn btn-outline-secondary btn-sm" (click)="addCategoryForMenuId.set(null)">Otkaži</button>
+              </div>
+            </div>
+          } @else {
+            <button class="btn btn-outline-secondary btn-sm mt-2" (click)="openAddCategory(menu.menuId)">+ Dodaj kategoriju</button>
+          }
+        </div>
+      </div>
+    }
+  }
+
+  @if (showAddMenuForm()) {
+    <div class="card card-body bg-light mb-3" style="max-width: 400px;">
+      <input class="form-control form-control-sm mb-2" [(ngModel)]="newMenuForm.nameSr" placeholder="Naziv menija (sr)" />
+      <input class="form-control form-control-sm mb-2" [(ngModel)]="newMenuForm.nameEn" placeholder="Naziv menija (en)" />
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary btn-sm" [disabled]="saving()" (click)="submitNewMenu()">Sačuvaj meni</button>
+        <button class="btn btn-outline-secondary btn-sm" (click)="showAddMenuForm.set(false)">Otkaži</button>
+      </div>
+    </div>
+  } @else {
+    <button class="btn btn-primary" (click)="showAddMenuForm.set(true)">+ Dodaj meni</button>
+  }
+</div>

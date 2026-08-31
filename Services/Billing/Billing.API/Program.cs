@@ -1,4 +1,5 @@
 using Billing.API.Middleware;
+using Billing.API.Messaging;
 using Billing.API.Services;
 using Billing.Application;
 using Billing.Infrastructure;
@@ -25,7 +26,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Enter the JWT token returned by the Identity service."
+        Description = "Enter the JWT token returned by UserService."
     });
     options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
@@ -37,6 +38,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddGrpc();
+builder.Services.AddHostedService<CartCheckedOutConsumer>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("JWT signing key is not configured.");
