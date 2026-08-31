@@ -12,11 +12,47 @@ builder.Configuration
         optional: false,
         reloadOnChange: true);
 
+if (builder.Configuration.GetValue<bool>("UseDockerServiceDiscovery"))
+{
+    var downstreamServices = new Dictionary<string, (string Host, int Port)>
+    {
+        ["/api/carts"] = ("cart-service", 8080),
+        ["/api/delivery"] = ("delivery-api", 8080),
+        ["/api/restaurants"] = ("restaurant-api", 8080),
+        ["/api/menu-items"] = ("restaurant-api", 8080),
+        ["/api/users"] = ("user-api", 8080),
+        ["/api/invoices"] = ("billing-api", 5005)
+    };
+    var overrides = new Dictionary<string, string?>();
+    var routes = builder.Configuration.GetSection("Routes").GetChildren().ToArray();
+
+    for (var index = 0; index < routes.Length; index++)
+    {
+        var downstreamPath = routes[index]["DownstreamPathTemplate"];
+        var service = downstreamServices.FirstOrDefault(entry =>
+            downstreamPath?.StartsWith(entry.Key, StringComparison.OrdinalIgnoreCase) == true);
+
+        if (service.Key is null)
+        {
+            continue;
+        }
+
+        overrides[$"Routes:{index}:DownstreamHostAndPorts:0:Host"] = service.Value.Host;
+        overrides[$"Routes:{index}:DownstreamHostAndPorts:0:Port"] =
+            service.Value.Port.ToString();
+    }
+
+    builder.Configuration.AddInMemoryCollection(overrides);
+}
+
 builder.Services.AddOcelot(builder.Configuration);
 
-var jwtKey = builder.Configuration["Jwt:Key"]!;
-var jwtIssuer = builder.Configuration["Jwt:Issuer"]!;
-var jwtAudience = builder.Configuration["Jwt:Audience"]!;
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("JWT signing key is not configured.");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? throw new InvalidOperationException("JWT issuer is not configured.");
+var jwtAudience = builder.Configuration["Jwt:Audience"]
+    ?? throw new InvalidOperationException("JWT audience is not configured.");
 
 builder.Services.AddAuthentication()
     .AddJwtBearer("Bearer", options =>

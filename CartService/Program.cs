@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Diagnostics;
 using CartService.Exceptions;
 using CartService.Clients;
 using CartService.Messaging;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -20,6 +23,25 @@ builder.Services.AddScoped<ICartRepository, RedisCartRepositories>();
 builder.Services.AddScoped<ICartService, CartManager>();
 
 builder.Services.AddScoped<IRabbitMqPublisher, RabbitMqPublisher>();
+
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("JWT signing key is not configured.");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+builder.Services.AddAuthorization();
 
 var restaurantServiceUrl = builder.Configuration["Services:RestaurantService"] 
                            ?? throw new InvalidOperationException("Restaurant service url is not configured.");
@@ -73,5 +95,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.Run();

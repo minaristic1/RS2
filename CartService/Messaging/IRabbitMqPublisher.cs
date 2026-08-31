@@ -1,4 +1,4 @@
-using CartService.Events;
+using EventBus.Messages.Events;
 
 namespace CartService.Messaging;
 

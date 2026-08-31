@@ -6,7 +6,7 @@ using CartService.Services;
 using Moq;
 using CartService.Clients;
 using CartService.Messaging;
-using CartService.Events;
+using EventBus.Messages.Events;
 
 namespace CartService.Tests.Services;
 
@@ -22,7 +22,10 @@ public class CartManagerTests
         _repositoryMock = new Mock<ICartRepository>();
         _restaurantClientMock = new Mock<IRestaurantClient>();
         _rabbitMqPublisherMock = new Mock<IRabbitMqPublisher>();
-        _cartManager = new CartManager(_repositoryMock.Object, _restaurantClientMock.Object, _rabbitMqPublisherMock.Object);
+        _cartManager = new CartManager(
+            _repositoryMock.Object,
+            _restaurantClientMock.Object,
+            _rabbitMqPublisherMock.Object);
     }
 
     [Fact]
@@ -445,6 +448,7 @@ public class CartManagerTests
         _rabbitMqPublisherMock.Verify(
             publisher => publisher.PublishCartCheckedOutAsync(
                 It.Is<CartCheckedOutEvent>(message =>
+                    message.OrderId != Guid.Empty &&
                     message.UserId == userId &&
                     message.RestaurantId == restaurantId &&
                     message.DeliveryAddress == "Ulica Slobode 5" &&
@@ -461,4 +465,42 @@ public class CartManagerTests
             repository => repository.DeleteCartAsync(userId),
             Times.Once);
     }
+
+    [Fact]
+    public async Task CheckoutAsync_WhenRetried_ReusesExistingOrderId()
+    {
+        var existingOrderId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var cart = new Cart
+        {
+            UserId = userId,
+            CheckoutOrderId = existingOrderId,
+            Items =
+            {
+                new CartItem
+                {
+                    ProductId = Guid.NewGuid(),
+                    RestaurantId = Guid.NewGuid(),
+                    ProductName = "Capricciosa",
+                    Price = 850,
+                    Quantity = 1
+                }
+            }
+        };
+        _repositoryMock
+            .Setup(repository => repository.GetCartAsync(userId))
+            .ReturnsAsync(cart);
+
+        await _cartManager.CheckoutAsync(
+            userId,
+            new CheckoutRequest { DeliveryAddress = "Ulica Slobode 5" });
+
+        _rabbitMqPublisherMock.Verify(
+            publisher => publisher.PublishCartCheckedOutAsync(
+                It.Is<CartCheckedOutEvent>(message =>
+                    message.OrderId == existingOrderId),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
 }

@@ -3,8 +3,8 @@ using CartService.DTOs;
 using CartService.Repositories;
 using CartService.Exceptions;
 using CartService.Clients;
-using CartService.Events;
 using CartService.Messaging;
+using EventBus.Messages.Events;
 
 namespace CartService.Services;
 
@@ -14,7 +14,10 @@ public class CartManager : ICartService
     private readonly IRestaurantClient _restaurantClient;
     private readonly IRabbitMqPublisher _rabbitMqPublisher;
 
-    public CartManager(ICartRepository cartRepository, IRestaurantClient restaurantClient, IRabbitMqPublisher rabbitMqPublisher)
+    public CartManager(
+        ICartRepository cartRepository,
+        IRestaurantClient restaurantClient,
+        IRabbitMqPublisher rabbitMqPublisher)
     {
         _cartRepository = cartRepository;
         _restaurantClient = restaurantClient;
@@ -87,6 +90,7 @@ public class CartManager : ICartService
             });
         }
 
+        cart.CheckoutOrderId = null;
         await _cartRepository.SaveCartAsync(cart);
 
         return MapToResponse(cart);
@@ -110,6 +114,7 @@ public class CartManager : ICartService
 
         item.Quantity = request.Quantity;
 
+        cart.CheckoutOrderId = null;
         await _cartRepository.SaveCartAsync(cart);
         
         return MapToResponse(cart);
@@ -133,6 +138,7 @@ public class CartManager : ICartService
 
         cart.Items.Remove(item);
 
+        cart.CheckoutOrderId = null;
         await _cartRepository.SaveCartAsync(cart);
 
         return MapToResponse(cart);
@@ -153,14 +159,17 @@ public class CartManager : ICartService
                 "Korpa ne postoji ili je prazna.");
         }
 
+        cart.CheckoutOrderId ??= Guid.NewGuid();
+        await _cartRepository.SaveCartAsync(cart);
+
         var checkoutEvent = new CartCheckedOutEvent
         {
+            OrderId = cart.CheckoutOrderId.Value,
             UserId = cart.UserId,
             RestaurantId = cart.Items.First().RestaurantId,
             DeliveryAddress = request.DeliveryAddress,
             TotalPrice = cart.TotalPrice,
             CreatedAt = DateTime.UtcNow,
- 
             Items = cart.Items.Select(item =>
                 new CartCheckedOutItem
                 {
@@ -170,10 +179,10 @@ public class CartManager : ICartService
                     Quantity = item.Quantity
                 }).ToList()
         };
- 
+
         await _rabbitMqPublisher.PublishCartCheckedOutAsync(
             checkoutEvent);
- 
+
         await _cartRepository.DeleteCartAsync(userId);
     }
 

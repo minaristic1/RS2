@@ -1,6 +1,6 @@
 using System.Text;
 using System.Text.Json;
-using CartService.Events;
+using EventBus.Messages.Events;
 using RabbitMQ.Client;
  
 namespace CartService.Messaging;
