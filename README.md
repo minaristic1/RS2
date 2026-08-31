@@ -44,6 +44,32 @@ Web aplikacija je dostupna na `http://localhost:4200`.
 Checkout korpe objavljuje `CartCheckedOutEvent` preko RabbitMQ-a. Billing servis
 konzumira događaj sa `payment.queue` i automatski kreira račun za porudžbinu.
 
+## Billing servis
+
+Billing se pokreće zajedno sa ostatkom sistema komandom:
+
+```bash
+docker compose up --build -d
+```
+
+Za rad Billing servisa potrebni su `billing-db`, `rabbitmq` i `user-api`.
+Ako se testira samo ovaj deo projekta, mogu se pokrenuti ovako:
+
+```bash
+docker compose up --build -d billing-db rabbitmq sqlserver user-api billing-api
+```
+
+Testiranje preko Swagger-a:
+
+1. Na `http://localhost:5238/swagger` registrujte korisnika i prijavite se.
+2. Kopirajte polje `token` iz odgovora za prijavu.
+3. Otvorite `http://localhost:5005/swagger`, kliknite **Authorize** i unesite token.
+4. Kreirajte račun preko `POST /api/invoices`, a zatim ga platite preko
+   `POST /api/invoices/{id}/payments`.
+
+Billing koristi PostgreSQL na portu `5433`, REST API na `5005` i gRPC na `5001`.
+Račun se može kreirati i automatski kada Cart servis pošalje checkout događaj.
+
 Za zaustavljanje sistema:
 
 ```bash
