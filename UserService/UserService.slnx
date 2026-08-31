@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="../UserService.Tests/UserService.Tests.csproj" Id="53ec0c17-af77-4b68-99e9-a20cb205ab6b" />
+  <Project Path="../UserService.Application/UserService.Application.csproj" />
+  <Project Path="UserService.csproj" />
+  <Project Path="../UserService.Domain/UserService.Domain.csproj" />
+  <Project Path="../UserService.Infrastructure/UserService.Infrastructure.csproj" />
+</Solution>
