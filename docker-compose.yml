@@ -1,0 +1,84 @@
+services:
+  billing-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: grizgo_billing
+    ports:
+      - "5433:5432"
+    volumes:
+      - billing-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d grizgo_billing"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  identity-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: grizgo_identity
+    ports:
+      - "5434:5432"
+    volumes:
+      - identity-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d grizgo_identity"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  billing-api:
+    build:
+      context: .
+      dockerfile: Services/Billing/Billing.API/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__BillingConnection: Host=billing-db;Port=5432;Database=grizgo_billing;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      Jwt__Issuer: GrizGo.Identity
+      Jwt__Audience: GrizGo.Services
+      Jwt__Key: ${JWT_SIGNING_KEY:-development-only-signing-key-change-before-production-2026}
+    ports:
+      - "5005:5005"
+      - "5001:5001"
+    depends_on:
+      billing-db:
+        condition: service_healthy
+
+  identity-api:
+    build:
+      context: .
+      dockerfile: Security/IdentityServer/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__IdentityConnection: Host=identity-db;Port=5432;Database=grizgo_identity;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      Jwt__Issuer: GrizGo.Identity
+      Jwt__Audience: GrizGo.Services
+      Jwt__Key: ${JWT_SIGNING_KEY:-development-only-signing-key-change-before-production-2026}
+    ports:
+      - "5100:8080"
+    depends_on:
+      identity-db:
+        condition: service_healthy
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: ApiGateway/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      OcelotConfigurationFile: ocelot.Docker.json
+    ports:
+      - "5029:8080"
+    depends_on:
+      - billing-api
+      - identity-api
+
+volumes:
+  billing-db-data:
+  identity-db-data:

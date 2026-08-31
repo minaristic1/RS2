@@ -1,4 +1,4 @@
-@Billing_API_HostAddress = http://localhost:5000
+@Billing_API_HostAddress = http://localhost:5005
 
 POST {{Billing_API_HostAddress}}/api/invoices
 Content-Type: application/json

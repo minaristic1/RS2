@@ -1,55 +1,11 @@
 {
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/carts/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5205
-        }
-      ],
-      "UpstreamPathTemplate": "/api/carts/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "PUT",
-        "DELETE"
-      ],
-      "RateLimitOptions": {
-        "EnableRateLimiting": true,
-        "Period": "10s",
-        "PeriodTimespan": 10,
-        "Limit": 20
-      }
-    },
-    {
-      "DownstreamPathTemplate": "/api/delivery/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 8080
-        }
-      ],
-      "UpstreamPathTemplate": "/api/delivery/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST"
-      ],
-      "RateLimitOptions": {
-        "EnableRateLimiting": true,
-        "Period": "10s",
-        "PeriodTimespan": 10,
-        "Limit": 20
-      }
-    },
-    {
       "DownstreamPathTemplate": "/api/invoices",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "billing-api",
           "Port": 5005
         }
       ],
@@ -70,7 +26,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "billing-api",
           "Port": 5005
         }
       ],
@@ -91,8 +47,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5100
+          "Host": "identity-api",
+          "Port": 8080
         }
       ],
       "UpstreamPathTemplate": "/api/auth/{everything}",
@@ -104,10 +60,8 @@
       }
     }
   ],
-
   "GlobalConfiguration": {
     "BaseUrl": "http://localhost:5029",
-
     "RateLimitOptions": {
       "ClientIdHeader": "ClientId"
     }

@@ -3,6 +3,9 @@
   <Folder Name="/Common/">
     <Project Path="Common/EventBus.Messages/EventBus.Messages.csproj" />
   </Folder>
+  <Folder Name="/Security/">
+    <Project Path="Security/IdentityServer/IdentityServer.csproj" />
+  </Folder>
   <Folder Name="/Services/Billing/">
     <Project Path="Services/Billing/Billing.API/Billing.API.csproj" />
     <Project Path="Services/Billing/Billing.Application/Billing.Application.csproj" />

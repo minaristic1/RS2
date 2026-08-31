@@ -5,11 +5,13 @@ using Billing.Application.Features.Billing.Queries.GetCustomerInvoices;
 using Billing.Application.Features.Billing.Queries.GetInvoice;
 using Billing.Application.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Billing.API.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/invoices")]
 public sealed class InvoicesController(ISender sender) : ControllerBase
 {
@@ -76,4 +78,3 @@ public sealed class InvoicesController(ISender sender) : ControllerBase
         return Ok(payment);
     }
 }
-

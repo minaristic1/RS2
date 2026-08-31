@@ -2,10 +2,13 @@ using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
  
 var builder = WebApplication.CreateBuilder(args);
- 
+
+var ocelotConfigurationFile =
+    builder.Configuration["OcelotConfigurationFile"] ?? "ocelot.json";
+
 builder.Configuration
     .AddJsonFile(
-        "ocelot.json",
+        ocelotConfigurationFile,
         optional: false,
         reloadOnChange: true);
  
