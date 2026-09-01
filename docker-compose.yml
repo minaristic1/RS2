@@ -151,6 +151,9 @@ services:
       RabbitMq__Port: 5672
       RabbitMq__Username: ${RABBITMQ_USER:-grizgo}
       RabbitMq__Password: ${RABBITMQ_PASSWORD:-grizgo123}
+      Jwt__Key: ${JWT_SIGNING_KEY:-GrizGo-Super-Tajni-Kljuc-Za-Seminarski-2026-Ilinka}
+      Jwt__Issuer: GrizGo.UserService
+      Jwt__Audience: GrizGo
     ports:
       - "5121:8080"
     depends_on:
