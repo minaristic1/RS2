@@ -27,6 +27,8 @@ public sealed class InvoicesController(ISender sender) : ControllerBase
         var command = new CreateInvoiceCommand(
             request.OrderId,
             customerId,
+            request.RestaurantId,
+            request.DeliveryAddress,
             request.Currency,
             request.Items.Select(item => new CreateInvoiceItem(
                 item.ProductId,
@@ -86,7 +88,13 @@ public sealed class InvoicesController(ISender sender) : ControllerBase
                 id,
                 request.Method,
                 request.Provider,
-                request.TransactionReference),
+                request.TransactionReference,
+                User.FindFirstValue("fullName")
+                    ?? User.FindFirstValue(ClaimTypes.Email)
+                    ?? "Customer",
+                string.IsNullOrWhiteSpace(request.CustomerPhone)
+                    ? User.FindFirstValue(ClaimTypes.Email) ?? "Not provided"
+                    : request.CustomerPhone.Trim()),
             cancellationToken);
 
         return Ok(payment);

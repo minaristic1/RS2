@@ -156,6 +156,8 @@ public sealed class CartCheckedOutConsumer(
             new CreateInvoiceCommand(
                 message.OrderId,
                 message.UserId,
+                message.RestaurantId,
+                message.DeliveryAddress,
                 currency,
                 items),
             cancellationToken);

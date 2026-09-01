@@ -14,7 +14,12 @@ public sealed class Invoice : AggregateRoot
     {
     }
 
-    private Invoice(Guid orderId, Guid customerId, string currency)
+    private Invoice(
+        Guid orderId,
+        Guid customerId,
+        Guid restaurantId,
+        string deliveryAddress,
+        string currency)
     {
         if (orderId == Guid.Empty)
         {
@@ -26,6 +31,16 @@ public sealed class Invoice : AggregateRoot
             throw new BillingDomainException("Customer identifier is required.");
         }
 
+        if (restaurantId == Guid.Empty)
+        {
+            throw new BillingDomainException("Restaurant identifier is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(deliveryAddress))
+        {
+            throw new BillingDomainException("Delivery address is required.");
+        }
+
         if (string.IsNullOrWhiteSpace(currency) || currency.Trim().Length != 3)
         {
             throw new BillingDomainException("Currency must be a three-letter ISO code.");
@@ -33,12 +48,16 @@ public sealed class Invoice : AggregateRoot
 
         OrderId = orderId;
         CustomerId = customerId;
+        RestaurantId = restaurantId;
+        DeliveryAddress = deliveryAddress.Trim();
         Currency = currency.Trim().ToUpperInvariant();
         Status = InvoiceStatus.AwaitingPayment;
     }
 
     public Guid OrderId { get; private set; }
     public Guid CustomerId { get; private set; }
+    public Guid RestaurantId { get; private set; }
+    public string DeliveryAddress { get; private set; } = string.Empty;
     public string Currency { get; private set; } = string.Empty;
     public decimal TotalAmount { get; private set; }
     public InvoiceStatus Status { get; private set; }
@@ -49,10 +68,17 @@ public sealed class Invoice : AggregateRoot
     public static Invoice Create(
         Guid orderId,
         Guid customerId,
+        Guid restaurantId,
+        string deliveryAddress,
         string currency,
         IEnumerable<InvoiceItem> items)
     {
-        var invoice = new Invoice(orderId, customerId, currency);
+        var invoice = new Invoice(
+            orderId,
+            customerId,
+            restaurantId,
+            deliveryAddress,
+            currency);
         invoice._items.AddRange(items);
 
         if (invoice._items.Count == 0)
@@ -95,4 +121,3 @@ public sealed class Invoice : AggregateRoot
         return payment;
     }
 }
-

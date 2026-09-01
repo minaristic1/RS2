@@ -12,7 +12,9 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
         builder.HasKey(invoice => invoice.Id);
         builder.HasIndex(invoice => invoice.OrderId).IsUnique();
         builder.HasIndex(invoice => invoice.CustomerId);
+        builder.HasIndex(invoice => invoice.RestaurantId);
 
+        builder.Property(invoice => invoice.DeliveryAddress).HasMaxLength(500).IsRequired();
         builder.Property(invoice => invoice.Currency).HasMaxLength(3).IsRequired();
         builder.Property(invoice => invoice.TotalAmount).HasPrecision(18, 2);
         builder.Property(invoice => invoice.Status).HasConversion<string>().HasMaxLength(30);
@@ -33,4 +35,3 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
             .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
-

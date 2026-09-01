@@ -189,6 +189,7 @@ services:
       RabbitMq__Port: 5672
       RabbitMq__Username: ${RABBITMQ_USER:-grizgo}
       RabbitMq__Password: ${RABBITMQ_PASSWORD:-grizgo123}
+      Services__RestaurantService: http://restaurant-api:8080/
     ports:
       - "5005:5005"
       - "5001:5001"
@@ -197,6 +198,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      restaurant-api:
+        condition: service_started
 
   api-gateway:
     build:

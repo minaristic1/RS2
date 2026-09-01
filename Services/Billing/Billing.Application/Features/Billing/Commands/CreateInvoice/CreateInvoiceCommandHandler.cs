@@ -24,6 +24,8 @@ public sealed class CreateInvoiceCommandHandler(IInvoiceRepository invoiceReposi
         var invoice = Invoice.Create(
             request.OrderId,
             request.CustomerId,
+            request.RestaurantId,
+            request.DeliveryAddress,
             request.Currency,
             items);
 
@@ -32,4 +34,3 @@ public sealed class CreateInvoiceCommandHandler(IInvoiceRepository invoiceReposi
         return Models.InvoiceDto.FromInvoice(invoice);
     }
 }
-

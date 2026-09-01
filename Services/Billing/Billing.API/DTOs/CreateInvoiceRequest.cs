@@ -4,6 +4,8 @@ namespace Billing.API.DTOs;
 
 public sealed record CreateInvoiceRequest(
     [Required] Guid OrderId,
+    [Required] Guid RestaurantId,
+    [Required, StringLength(500)] string DeliveryAddress,
     [Required, StringLength(3, MinimumLength = 3)] string Currency,
     [Required, MinLength(1)] IReadOnlyCollection<CreateInvoiceItemRequest> Items);
 

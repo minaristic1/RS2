@@ -8,5 +8,6 @@ public sealed record PayInvoiceCommand(
     Guid InvoiceId,
     PaymentMethod Method,
     string Provider,
-    string TransactionReference) : IRequest<PaymentDto>;
-
+    string TransactionReference,
+    string CustomerName,
+    string CustomerPhone) : IRequest<PaymentDto>;
