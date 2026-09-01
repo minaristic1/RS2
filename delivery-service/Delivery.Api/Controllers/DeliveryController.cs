@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 using Delivery.Data.Models;
@@ -23,6 +24,7 @@ namespace Delivery.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<DeliveryOrder>> Create(CreateDeliveryOrderCommand command)
         {
             var delivery = await _mediator.Send(command);
@@ -64,6 +66,7 @@ namespace Delivery.Api.Controllers
         }
 
         [HttpPost("{id}/advance-status")]
+        [Authorize]
         public async Task<ActionResult<DeliveryOrder>> AdvanceStatus(Guid id)
         {
             try
@@ -84,6 +87,7 @@ namespace Delivery.Api.Controllers
         }
 
         [HttpPost("{id}/cancel")]
+        [Authorize]
         public async Task<ActionResult<DeliveryOrder>> Cancel(Guid id)
         {
             try
@@ -104,6 +108,7 @@ namespace Delivery.Api.Controllers
         }
 
         [HttpPost("{id}/assign-courier")]
+        [Authorize]
         public async Task<ActionResult<DeliveryOrder>> AssignCourier(Guid id, [FromQuery] Guid courierId)
         {
             var delivery = await _mediator.Send(new AssignCourierCommand(id, courierId));
