@@ -1,0 +1,52 @@
+<div class="payment-container">
+  <h2 class="mb-1">Plaćanje</h2>
+  <p class="text-muted small mb-3">Poslednji korak — plati porudžbinu da je restoran vidi i počne pripremu.</p>
+
+  @if (waiting()) {
+    <div class="card" style="max-width: 480px;">
+      <div class="card-body text-center">
+        <p class="mb-0">Kreiramo tvoj račun...</p>
+      </div>
+    </div>
+  }
+
+  @if (notFound()) {
+    <div class="alert alert-warning" style="max-width: 480px;">
+      Račun još nije spreman. Osveži stranicu za par trenutaka.
+    </div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger" style="max-width: 480px;">
+      Došlo je do greške. Proveri da li su servisi pokrenuti i pokušaj ponovo.
+    </div>
+  }
+
+  @if (invoice(); as inv) {
+    <div class="card" style="max-width: 480px;">
+      <div class="card-body">
+        @if (paid()) {
+          <div class="alert alert-success">Uspešno plaćeno! Restoran je obavešten.</div>
+          <p class="mb-1"><strong>ID porudžbine (za praćenje):</strong></p>
+          <p class="mb-3"><code>{{ inv.orderId }}</code></p>
+          <a routerLink="/track" class="btn btn-primary w-100">Prati dostavu</a>
+        } @else {
+          <h3 class="h5">Stavke</h3>
+          <ul class="list-group list-group-flush mb-3">
+            @for (item of inv.items; track item.productId) {
+              <li class="list-group-item d-flex justify-content-between">
+                <span>{{ item.name }} x{{ item.quantity }}</span>
+                <span>{{ item.total }} {{ inv.currency }}</span>
+              </li>
+            }
+          </ul>
+          <p class="mb-3"><strong>Ukupno: {{ inv.totalAmount }} {{ inv.currency }}</strong></p>
+
+          <button class="btn btn-accent w-100" [disabled]="paying()" (click)="pay()">
+            {{ paying() ? 'Plaćanje...' : 'Plati' }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

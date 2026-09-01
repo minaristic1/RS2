@@ -1,6 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CartService } from '../services/cart.service';
 import { Cart } from '../models/cart';
 
@@ -19,7 +20,7 @@ export class CartViewComponent implements OnInit {
   deliveryAddress = '';
   addressMissing = signal(false);
 
-  constructor(private cartService: CartService) {}
+  constructor(private cartService: CartService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadCart();
@@ -79,7 +80,7 @@ export class CartViewComponent implements OnInit {
     this.cartService.checkout(this.deliveryAddress).subscribe({
       next: () => {
         this.deliveryAddress = '';
-        this.loadCart();
+        this.router.navigate(['/payment']);
       },
       error: () => this.actionError.set(true)
     });
