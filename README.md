@@ -218,6 +218,44 @@ korisnika, email, uloga, ime i (ako postoji) `restaurantId` — ovaj poslednji
 koriste Restaurant servis i Gateway da utvrde kojim resursima korisnik sme
 da pristupi.
 
+## Delivery servis
+
+Delivery se pokreće zajedno sa ostatkom sistema komandom:
+
+```bash
+docker compose up --build -d
+```
+
+Za rad Delivery servisa potrebni su `delivery-db` i `rabbitmq`. Ako se testira
+samo ovaj deo projekta, mogu se pokrenuti ovako:
+
+```bash
+docker compose up --build -d delivery-db rabbitmq delivery-api delivery-grpc
+```
+
+Delivery prati porudžbinu kroz status: `Created` → `Confirmed` → `Preparing` →
+`ReadyForPickup` → `OutForDelivery` → `Delivered` (ili `Cancelled` u bilo kom
+trenutku pre preuzimanja). Restoran potvrđuje i priprema porudžbinu, a
+dostavljač je preuzima tek kad je označena kao spremna za preuzimanje
+("dupla potvrda").
+
+Testiranje preko Swagger-a:
+
+1. Na `http://localhost:5238/swagger` registrujte se i prijavite (za praćenje
+   porudžbine token nije obavezan, za sve ostale akcije jeste).
+2. Otvorite `http://localhost:5121/swagger`.
+3. Porudžbinu kreira samo Admin, preko `POST /api/delivery` — u realnom toku
+   se ovo dešava automatski kada je porudžbina plaćena.
+4. Status se pomera preko `POST /api/delivery/{id}/advance-status`, dostavljač
+   se dodeljuje preko `POST /api/delivery/{id}/assign-courier`, a otkazivanje
+   ide preko `POST /api/delivery/{id}/cancel` (potreban je token ulogovanog
+   korisnika).
+5. Porudžbina se prati javno, bez prijave, preko
+   `GET /api/delivery/by-order/{orderId}`.
+
+Delivery koristi PostgreSQL na portu `5435`, REST API na `5121` i gRPC na
+`5261`.
+
 Za zaustavljanje sistema:
 
 ```bash
