@@ -17,6 +17,7 @@
     <Project Path="Services/Billing/Billing.Application/Billing.Application.csproj" />
     <Project Path="Services/Billing/Billing.Domain/Billing.Domain.csproj" />
     <Project Path="Services/Billing/Billing.Infrastructure/Billing.Infrastructure.csproj" />
+    <Project Path="Services/Billing/Billing.Tests/Billing.Tests.csproj" />
   </Folder>
   <Project Path="RestaurantService.Application/RestaurantService.Application.csproj" />
   <Project Path="RestaurantService.Domain/RestaurantService.Domain.csproj" />
