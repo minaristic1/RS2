@@ -1,0 +1,53 @@
+<div class="cart-container">
+  <h2 class="mb-1">Moja korpa</h2>
+  <p class="text-muted small mb-3">Proveri svoju porudžbinu i unesi adresu pre nego što je pošalješ restoranu.</p>
+
+  @if (loading()) {
+    <p>Učitavanje...</p>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">Trenutno ne možemo da učitamo korpu. Proveri da li je servis pokrenut.</div>
+  }
+
+  @if (actionError()) {
+    <div class="alert alert-danger">Nešto nije uspelo. Pokušaj ponovo.</div>
+  }
+
+  @if (cart(); as c) {
+    @if (c.items.length === 0) {
+      <p class="text-muted">Korpa je prazna.</p>
+    } @else {
+      <ul class="list-group mb-3" style="max-width: 560px;">
+        @for (item of c.items; track item.productId) {
+          <li class="list-group-item d-flex align-items-center justify-content-between">
+            <span>{{ item.productName }}</span>
+            <div class="d-flex align-items-center gap-2">
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-secondary" (click)="decreaseQuantity(item.productId, item.quantity)">-</button>
+                <span class="btn btn-outline-secondary disabled">{{ item.quantity }}</span>
+                <button class="btn btn-outline-secondary" (click)="increaseQuantity(item.productId, item.quantity)">+</button>
+              </div>
+              <span style="min-width: 80px; text-align: right;">{{ item.totalPrice }} RSD</span>
+              <button class="btn btn-sm btn-outline-danger" (click)="removeItem(item.productId)">Ukloni</button>
+            </div>
+          </li>
+        }
+      </ul>
+
+      <p class="cart-total"><strong>Ukupno: {{ c.totalPrice }} RSD</strong></p>
+
+      <div class="mb-3" style="max-width: 400px;">
+        <label class="form-label">Adresa dostave</label>
+        <input class="form-control" [(ngModel)]="deliveryAddress" placeholder="Unesi adresu dostave" />
+        @if (addressMissing()) {
+          <small class="text-danger">Adresa dostave je obavezna.</small>
+        }
+      </div>
+
+      <button class="btn btn-accent" (click)="checkout()" [disabled]="checkoutInProgress()">
+        {{ checkoutInProgress() ? 'Slanje...' : 'Naruči' }}
+      </button>
+    }
+  }
+</div>

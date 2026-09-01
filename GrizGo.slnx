@@ -1,3 +1,31 @@
 <Solution>
+  <Project Path="CartService.Tests/CartService.Tests.csproj" />
+  <Project Path="CartService/CartService.csproj" />
   <Project Path="ApiGateway/ApiGateway.csproj" />
+  <Folder Name="/Common/">
+    <Project Path="Common/EventBus.Messages/EventBus.Messages.csproj" />
+  </Folder>
+  <Folder Name="/delivery-service/">
+    <Project Path="delivery-service/Delivery.Api/Delivery.Api.csproj" />
+    <Project Path="delivery-service/Delivery.Data/Delivery.Data.csproj" />
+    <Project Path="delivery-service/Delivery.GRPC/Delivery.GRPC.csproj" />
+    <Project Path="delivery-service/Delivery.Tests/Delivery.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Services/" />
+  <Folder Name="/Services/Billing/">
+    <Project Path="Services/Billing/Billing.API/Billing.API.csproj" />
+    <Project Path="Services/Billing/Billing.Application/Billing.Application.csproj" />
+    <Project Path="Services/Billing/Billing.Domain/Billing.Domain.csproj" />
+    <Project Path="Services/Billing/Billing.Infrastructure/Billing.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="RestaurantService.Application/RestaurantService.Application.csproj" />
+  <Project Path="RestaurantService.Domain/RestaurantService.Domain.csproj" />
+  <Project Path="RestaurantService.Infrastructure/RestaurantService.Infrastructure.csproj" />
+  <Project Path="RestaurantService.Tests/RestaurantService.Tests.csproj" />
+  <Project Path="RestaurantService/RestaurantService.csproj" />
+  <Project Path="UserService.Application/UserService.Application.csproj" />
+  <Project Path="UserService.Domain/UserService.Domain.csproj" />
+  <Project Path="UserService.Infrastructure/UserService.Infrastructure.csproj" />
+  <Project Path="UserService.Tests/UserService.Tests.csproj" />
+  <Project Path="UserService/UserService.csproj" />
 </Solution>
