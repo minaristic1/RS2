@@ -11,6 +11,7 @@ import { RegisterComponent } from './auth/register/register.component';
 import { LoginComponent } from './auth/login/login.component';
 import { CreateStaffComponent } from './admin/create-staff/create-staff.component';
 import { ContactComponent } from './contact/contact.component';
+import { PaymentComponent } from './billing/payment/payment.component';
 import { NotFoundComponent } from './shared/not-found/not-found.component';
 import { adminGuard } from './auth/guards/admin.guard';
 import { roleGuard } from './auth/guards/role.guard';
@@ -30,5 +31,6 @@ export const routes: Routes = [
   { path: 'restaurant-orders', component: RestaurantOrdersComponent, canActivate: [roleGuard(['RestaurantOwner', 'RestaurantEmployee', 'Admin'])] },
   { path: 'admin/create-staff', component: CreateStaffComponent, canActivate: [adminGuard] },
   { path: 'contact', component: ContactComponent },
+  { path: 'payment', component: PaymentComponent },
   { path: '**', component: NotFoundComponent }
 ];
