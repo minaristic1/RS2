@@ -44,6 +44,28 @@ Web aplikacija je dostupna na `http://localhost:4200`.
 Checkout korpe objavljuje `CartCheckedOutEvent` preko RabbitMQ-a. Billing servis
 konzumira događaj sa `payment.queue` i automatski kreira račun za porudžbinu.
 
+## Test podaci
+
+Za brzu proveru aplikacije (bez ručnog kreiranja naloga i restorana), pokreni
+skriptu nakon što je sistem podignut:
+
+```bash
+./seed-test-data.sh
+```
+
+Napravi jedan restoran ("Burek Centar" sa dve stavke menija) i po jedan nalog
+za svaku ulogu:
+
+| Uloga               | Email                  | Lozinka             |
+|----------------------|-------------------------|----------------------|
+| Admin                | admin@grizgo.rs         | AdminGrizGo2026!     |
+| Kupac                | kupac@grizgo.rs         | Test1234!            |
+| Dostavljač           | dostavljac@grizgo.rs    | Test1234!            |
+| Vlasnik restorana     | vlasnik@grizgo.rs       | Test1234! (vlasnik "Burek Centar") |
+
+Skripta nije idempotentna — pokretanje više puta na istoj bazi dupliraće
+restoran i meni.
+
 ## API Gateway
 API Gateway je implementiran pomoću Ocelot biblioteke i predstavlja jedinstvenu 
 ulaznu tačku ka mikroservisima sistema.
@@ -172,6 +194,10 @@ Posle uspešnog plaćanja Billing šalje događaj Delivery servisu, koji automat
 kreira dostavu za porudžbinu. Polje `customerPhone` pri plaćanju je opciono; ako
 nije poslato, kao kontakt se koristi email prijavljenog korisnika.
 
+Plaćanje je simulirano radi potreba seminarskog — ne postoji integracija sa
+pravim platnim sistemom (Stripe, kartice i sl.), `PayInvoiceRequest` samo
+beleži da je plaćanje izvršeno.
+
 ## Restaurant servis
 
 Restaurant servis je zadužen za katalog restorana: same restorane, njihove
@@ -256,8 +282,19 @@ Testiranje preko Swagger-a:
 Delivery koristi PostgreSQL na portu `5435`, REST API na `5121` i gRPC na
 `5261`.
 
-Za zaustavljanje sistema:
+## Zaustavljanje sistema
+
+Backend (svi kontejneri):
 
 ```bash
 docker compose down
 ```
+
+Ovo ne briše podatke iz baza — kontejneri se sledeći put podižu sa istim
+podacima. Za potpuno čisto stanje (brisanje i baza):
+
+```bash
+docker compose down -v
+```
+
+Frontend se zaustavlja sa `Ctrl+C` u terminalu gde je pokrenut `npm start`.
