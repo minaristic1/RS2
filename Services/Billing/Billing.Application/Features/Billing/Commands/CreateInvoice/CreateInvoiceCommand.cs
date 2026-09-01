@@ -6,6 +6,8 @@ namespace Billing.Application.Features.Billing.Commands.CreateInvoice;
 public sealed record CreateInvoiceCommand(
     Guid OrderId,
     Guid CustomerId,
+    Guid RestaurantId,
+    string DeliveryAddress,
     string Currency,
     IReadOnlyCollection<CreateInvoiceItem> Items) : IRequest<InvoiceDto>;
 
@@ -14,4 +16,3 @@ public sealed record CreateInvoiceItem(
     string Name,
     int Quantity,
     decimal UnitPrice);
-

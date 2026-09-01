@@ -168,6 +168,9 @@ Testiranje preko Swagger-a:
 
 Billing koristi PostgreSQL na portu `5433`, REST API na `5005` i gRPC na `5001`.
 Račun se može kreirati i automatski kada Cart servis pošalje checkout događaj.
+Posle uspešnog plaćanja Billing šalje događaj Delivery servisu, koji automatski
+kreira dostavu za porudžbinu. Polje `customerPhone` pri plaćanju je opciono; ako
+nije poslato, kao kontakt se koristi email prijavljenog korisnika.
 
 ## Restaurant servis
 

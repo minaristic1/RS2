@@ -14,6 +14,8 @@ message CreateInvoiceGrpcRequest {
   string customer_id = 2;
   string currency = 3;
   repeated InvoiceItemGrpcRequest items = 4;
+  string restaurant_id = 5;
+  string delivery_address = 6;
 }
 
 message InvoiceItemGrpcRequest {
@@ -34,5 +36,6 @@ message InvoiceGrpcResponse {
   string currency = 4;
   double total_amount = 5;
   string status = 6;
+  string restaurant_id = 7;
+  string delivery_address = 8;
 }
-

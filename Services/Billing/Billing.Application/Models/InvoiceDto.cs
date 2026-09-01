@@ -6,6 +6,8 @@ public sealed record InvoiceDto(
     Guid Id,
     Guid OrderId,
     Guid CustomerId,
+    Guid RestaurantId,
+    string DeliveryAddress,
     string Currency,
     decimal TotalAmount,
     string Status,
@@ -20,6 +22,8 @@ public sealed record InvoiceDto(
             invoice.Id,
             invoice.OrderId,
             invoice.CustomerId,
+            invoice.RestaurantId,
+            invoice.DeliveryAddress,
             invoice.Currency,
             invoice.TotalAmount,
             invoice.Status.ToString(),
@@ -43,4 +47,3 @@ public sealed record InvoiceItemDto(
     int Quantity,
     decimal UnitPrice,
     decimal Total);
-

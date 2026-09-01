@@ -2,6 +2,7 @@ using Billing.API.Middleware;
 using Billing.API.Messaging;
 using Billing.API.Services;
 using Billing.Application;
+using Billing.Application.Contracts.Infrastructure;
 using Billing.Infrastructure;
 using Billing.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -39,6 +40,14 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddGrpc();
 builder.Services.AddHostedService<CartCheckedOutConsumer>();
+builder.Services.AddScoped<IOrderReadyForDeliveryPublisher, OrderReadyForDeliveryPublisher>();
+
+var restaurantServiceUrl = builder.Configuration["Services:RestaurantService"]
+    ?? throw new InvalidOperationException("Restaurant service URL is not configured.");
+builder.Services.AddHttpClient<IRestaurantService, RestaurantServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(restaurantServiceUrl);
+});
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("JWT signing key is not configured.");
@@ -74,6 +83,19 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<BillingContext>();
     await context.Database.EnsureCreatedAsync();
+    await context.Database.ExecuteSqlRawAsync(
+        """
+        ALTER TABLE "Invoices"
+        ADD COLUMN IF NOT EXISTS "RestaurantId" uuid NOT NULL
+        DEFAULT '00000000-0000-0000-0000-000000000000';
+
+        ALTER TABLE "Invoices"
+        ADD COLUMN IF NOT EXISTS "DeliveryAddress" character varying(500)
+        NOT NULL DEFAULT '';
+
+        CREATE INDEX IF NOT EXISTS "IX_Invoices_RestaurantId"
+        ON "Invoices" ("RestaurantId");
+        """);
 }
 
 app.UseAuthentication();

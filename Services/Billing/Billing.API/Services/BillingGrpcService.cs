@@ -16,7 +16,8 @@ public sealed class BillingGrpcService(ISender sender) : GrpcContract.BillingSer
         ServerCallContext context)
     {
         if (!Guid.TryParse(request.OrderId, out var orderId) ||
-            !Guid.TryParse(request.CustomerId, out var customerId))
+            !Guid.TryParse(request.CustomerId, out var customerId) ||
+            !Guid.TryParse(request.RestaurantId, out var restaurantId))
         {
             throw new RpcException(new Status(
                 StatusCode.InvalidArgument,
@@ -45,6 +46,8 @@ public sealed class BillingGrpcService(ISender sender) : GrpcContract.BillingSer
                 new CreateInvoiceCommand(
                     orderId,
                     customerId,
+                    restaurantId,
+                    request.DeliveryAddress,
                     request.Currency,
                     items),
                 context.CancellationToken);
@@ -89,10 +92,11 @@ public sealed class BillingGrpcService(ISender sender) : GrpcContract.BillingSer
             Id = invoice.Id.ToString(),
             OrderId = invoice.OrderId.ToString(),
             CustomerId = invoice.CustomerId.ToString(),
+            RestaurantId = invoice.RestaurantId.ToString(),
+            DeliveryAddress = invoice.DeliveryAddress,
             Currency = invoice.Currency,
             TotalAmount = Convert.ToDouble(invoice.TotalAmount),
             Status = invoice.Status
         };
     }
 }
-

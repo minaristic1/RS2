@@ -5,6 +5,8 @@ Content-Type: application/json
 
 {
   "orderId": "5be9d604-f4fc-4f29-b9db-a23eb440d339",
+  "restaurantId": "2917da09-aa85-4ce9-a11c-e4f78dc4bf6c",
+  "deliveryAddress": "Studentski trg 16",
   "currency": "RSD",
   "items": [
     {
@@ -20,5 +22,17 @@ Content-Type: application/json
 
 GET {{Billing_API_HostAddress}}/api/invoices/{{invoiceId}}
 Accept: application/json
+
+###
+
+POST {{Billing_API_HostAddress}}/api/invoices/{{invoiceId}}/payments
+Content-Type: application/json
+
+{
+  "method": "Card",
+  "provider": "GrizGo",
+  "transactionReference": "transaction-001",
+  "customerPhone": "0601234567"
+}
 
 ###
