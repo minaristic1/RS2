@@ -44,6 +44,105 @@ Web aplikacija je dostupna na `http://localhost:4200`.
 Checkout korpe objavljuje `CartCheckedOutEvent` preko RabbitMQ-a. Billing servis
 konzumira događaj sa `payment.queue` i automatski kreira račun za porudžbinu.
 
+## API Gateway
+API Gateway je implementiran pomoću Ocelot biblioteke i predstavlja jedinstvenu 
+ulaznu tačku ka mikroservisima sistema.
+Implementiran je pomoću Ocelot biblioteke i zadužen je za rutiranje zahteva ka odgovarajućim servisima, 
+tako da klijent ne mora direktno da zna njihove interne portove i adrese.
+
+Lokalno je dostupan na `http://localhost:5029`
+
+Tok komunikacije izgleda ovako:
+```text
+Client
+  ↓
+API Gateway
+  ├── CartService
+  ├── RestaurantService
+  ├── Billing/PaymentService
+  └── DeliveryService
+```
+Za svaki mikroservis u `ApiGateway/ocelot.json` definišu se:
+- upstream ruta koju koristi klijent;
+- downstream ruta mikroservisa;
+- host i port servisa;
+- dozvoljene HTTP metode;
+- opciona pravila za autentifikaciju i rate limiting.
+
+Primer toka zahteva:
+```text
+Client
+  ↓
+http://localhost:5029/api/carts/...
+  ↓
+API Gateway
+  ↓
+CartService
+```
+
+Na isti način Gateway prosleđuje zahteve ka Restaurant, Billing/Payment i Delivery servisima.
+Gateway podržava JWT/Bearer autentifikaciju za zaštićene rute.
+Takođe je podešen rate limiting, kojim se ograničava broj zahteva koje jedan klijent može da pošalje 
+u određenom vremenskom periodu. Klijent se identifikuje pomoću ClientId HTTP zaglavlja.
+Za rute na kojima je rate limiting uključen, prekoračenje dozvoljenog broja zahteva vraća:
+
+```bash
+429 Too Many Requests
+```
+
+Gateway ima i health check endpoint:
+```bash
+GET /health
+```
+koji pri ispravnom radu vraća:
+```bash
+Healthy
+```
+Konfiguracija svih ruta nalazi se u `ApiGateway/ocelot.json`
+
+Dodavanje novog mikroservisa u Gateway svodi se na dodavanje nove Ocelot rute u ovaj
+konfiguracioni fajl, bez potrebe da se menja kod postojećih mikroservisa.
+
+## Cart servis
+
+Cart servis je zadužen za upravljanje korisničkom korpom. Podaci o korpi čuvaju se u Redis-u, 
+dok se podaci o proizvodima proveravaju preko Restaurant servisa.
+
+Podržane su operacije:
+- pregled korpe;
+- dodavanje proizvoda;
+- promena količine;
+- uklanjanje proizvoda;
+- pražnjenje korpe;
+- checkout.
+
+Cart API:
+
+```text
+GET    /api/carts/{userId}
+POST   /api/carts/{userId}/items
+PUT    /api/carts/{userId}/items/{productId}
+DELETE /api/carts/{userId}/items/{productId}
+DELETE /api/carts/{userId}
+POST   /api/carts/{userId}/checkout
+```
+
+Prilikom dodavanja proizvoda Cart servis poziva Restaurant servis (GET /api/menu-items/{id}) i od njega preuzima naziv, 
+cenu, restoran i dostupnost proizvoda. Korpa može da sadrži proizvode samo iz jednog restorana.
+
+Cart endpointi su zaštićeni JWT autentifikacijom. Korisnik može da pristupi samo svojoj korpi, dok administrator može 
+da pristupi svim korpama.
+
+Pri checkout-u Cart servis kreira CartCheckedOutEvent, koji sadrži podatke o porudžbini i adresi dostave. Događaj se 
+preko RabbitMQ-a objavljuje na:
+
+```text
+cart.exchange → cart.checked-out → payment.queue
+```
+
+Billing servis konzumira događaj i nastavlja obradu porudžbine. Korpa se briše tek nakon uspešnog objavljivanja događaja.
+Cart servis ima unit testove implementirane pomoću xUnit i Moq.
+
 ## Billing servis
 
 Billing se pokreće zajedno sa ostatkom sistema komandom:
