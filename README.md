@@ -169,6 +169,52 @@ Testiranje preko Swagger-a:
 Billing koristi PostgreSQL na portu `5433`, REST API na `5005` i gRPC na `5001`.
 Račun se može kreirati i automatski kada Cart servis pošalje checkout događaj.
 
+## Restaurant servis
+
+Restaurant servis je zadužen za katalog restorana: same restorane, njihove
+menije (meniji → kategorije → stavke), radno vreme i praznične izuzetke od
+radnog vremena.
+
+Lokalno je dostupan na `http://localhost:5056`, Swagger na
+`http://localhost:5056/swagger`.
+
+Podržane su operacije:
+- CRUD nad restoranima (kreiranje, izmena, brisanje, pretraga);
+- postavljanje radnog vremena i praznih dana (holiday exceptions);
+- CRUD nad menijima, kategorijama menija i stavkama menija.
+
+Pregled restorana, pretraga, meni i stavka menija (`GET /api/menu-items/{id}`)
+su javno dostupni, bez tokena — koristi ih i Cart servis da proveri naziv,
+cenu i dostupnost proizvoda pri dodavanju u korpu. Sve izmene zahtevaju JWT
+token i podležu dvostrukoj proveri:
+
+- provera uloge — samo `RestaurantOwner`, `RestaurantEmployee` ili `Admin`;
+- provera vlasništva — `RestaurantOwner` sme da menja samo restoran koji je
+  sam kreirao ili koji mu je Admin dodelio preko `/api/users/admin/staff`,
+  a `RestaurantEmployee` samo restoran za koji je vezan (`restaurantId` u
+  JWT tokenu). Admin nema ograničenje.
+
+Pokušaj izmene tuđeg restorana vraća `403 Forbidden`, a ne samo `401`.
+
+## User servis
+
+User servis vodi evidenciju korisničkih naloga (kupci, dostavljači, vlasnici
+i zaposleni restorana, administratori), autentifikaciju i izdavanje JWT
+tokena.
+
+Lokalno je dostupan na `http://localhost:5238`, Swagger na
+`http://localhost:5238/swagger`.
+
+Samostalna registracija (`POST /api/users/register`) je dozvoljena samo za
+role `Customer` i `Driver`. Naloge za `RestaurantOwner` i
+`RestaurantEmployee` kreira isključivo Admin preko `POST /api/users/admin/staff`,
+gde se zaposlenom obavezno, a vlasniku opciono, dodeljuje `restaurantId`.
+
+Prijava (`POST /api/users/login`) vraća JWT token sa claim-ovima: id
+korisnika, email, uloga, ime i (ako postoji) `restaurantId` — ovaj poslednji
+koriste Restaurant servis i Gateway da utvrde kojim resursima korisnik sme
+da pristupi.
+
 Za zaustavljanje sistema:
 
 ```bash
