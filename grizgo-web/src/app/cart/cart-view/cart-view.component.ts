@@ -19,6 +19,7 @@ export class CartViewComponent implements OnInit {
   actionError = signal(false);
   deliveryAddress = '';
   addressMissing = signal(false);
+  checkoutInProgress = signal(false);
 
   constructor(private cartService: CartService, private router: Router) {}
 
@@ -70,6 +71,10 @@ export class CartViewComponent implements OnInit {
   }
 
   checkout(): void {
+    if (this.checkoutInProgress()) {
+      return;
+    }
+
     if (!this.deliveryAddress.trim()) {
       this.addressMissing.set(true);
       return;
@@ -77,12 +82,17 @@ export class CartViewComponent implements OnInit {
 
     this.addressMissing.set(false);
     this.actionError.set(false);
+    this.checkoutInProgress.set(true);
     this.cartService.checkout(this.deliveryAddress).subscribe({
       next: () => {
+        this.checkoutInProgress.set(false);
         this.deliveryAddress = '';
         this.router.navigate(['/payment']);
       },
-      error: () => this.actionError.set(true)
+      error: () => {
+        this.checkoutInProgress.set(false);
+        this.actionError.set(true);
+      }
     });
   }
 }

@@ -45,7 +45,9 @@
         }
       </div>
 
-      <button class="btn btn-accent" (click)="checkout()">Naruči</button>
+      <button class="btn btn-accent" (click)="checkout()" [disabled]="checkoutInProgress()">
+        {{ checkoutInProgress() ? 'Slanje...' : 'Naruči' }}
+      </button>
     }
   }
 </div>

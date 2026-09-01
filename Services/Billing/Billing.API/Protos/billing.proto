@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option csharp_namespace = "Billing.API.Grpc";
+
+package billing;
+
+service BillingService {
+  rpc CreateInvoice (CreateInvoiceGrpcRequest) returns (InvoiceGrpcResponse);
+  rpc GetInvoice (GetInvoiceGrpcRequest) returns (InvoiceGrpcResponse);
+}
+
+message CreateInvoiceGrpcRequest {
+  string order_id = 1;
+  string customer_id = 2;
+  string currency = 3;
+  repeated InvoiceItemGrpcRequest items = 4;
+}
+
+message InvoiceItemGrpcRequest {
+  string product_id = 1;
+  string name = 2;
+  int32 quantity = 3;
+  double unit_price = 4;
+}
+
+message GetInvoiceGrpcRequest {
+  string invoice_id = 1;
+}
+
+message InvoiceGrpcResponse {
+  string id = 1;
+  string order_id = 2;
+  string customer_id = 3;
+  string currency = 4;
+  double total_amount = 5;
+  string status = 6;
+}
+

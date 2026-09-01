@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Ocelot" Version="25.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.11" />
   </ItemGroup>
 
   <ItemGroup>
