@@ -1,27 +1,39 @@
-# GrizgoWeb
+# GrizGo Web
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
+Angular frontend za GrizGo, aplikaciju za dostavu hrane. Pokriva ekrane za sve
+role u sistemu: Kupac, Vlasnik restorana, Zaposleni u restoranu, Dostavljač i
+Admin.
 
-## Development server
+## Šta je urađeno
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- **Prijava/registracija** — samostalna registracija je dozvoljena samo za
+  Kupca i Dostavljača; naloge za Vlasnika restorana i Zaposlenog kreira Admin
+- **Restorani** — pregled, pretraga i filter po tipu kuhinje; Admin dodaje
+  nove restorane; vlasnik/zaposleni uređuju podatke i meni svog restorana
+- **Korpa i plaćanje** — dodavanje stavki, unos adrese dostave, checkout, pa
+  plaćanje računa koji Billing servis automatski napravi
+- **Praćenje dostave** — status porudžbine se prati preko ID-ja porudžbine,
+  dostupno i bez prijave
+- **Porudžbine restorana** — vlasnik/zaposleni pomeraju status porudžbine
+  kroz pripremu
+- **Dostavljač** — pregled dostupnih dostava, preuzimanje i pomeranje statusa
+  do isporuke
+- **Admin panel** — kreiranje naloga za vlasnike/zaposlene restorana
 
-## Code scaffolding
+## Pokretanje
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Backend servisi (Gateway, User, Restaurant, Cart, Delivery, Billing) se
+pokreću preko Docker Compose-a iz korena repozitorijuma — pogledaj glavni
+`README.md`. Frontend se pokreće posebno:
 
-## Build
+```bash
+npm install
+npm start
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Aplikacija je dostupna na `http://localhost:4200`.
 
-## Running unit tests
+## Tehnologije
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Angular 17 (standalone komponente, signali, novi `@if`/`@for` sintaksa),
+Bootstrap za stilizovanje.
