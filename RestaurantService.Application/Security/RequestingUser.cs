@@ -29,7 +29,16 @@ public record RequestingUser(Guid Id, string Role, Guid? RestaurantId)
 
         if (IsRestaurantOwner)
         {
-            return restaurantOwnerId.HasValue && restaurantOwnerId.Value == Id;
+            if (restaurantOwnerId.HasValue && restaurantOwnerId.Value == Id)
+            {
+                return true;
+            }
+
+            // Owner accounts created by Admin via /api/users/admin/staff are assigned
+            // to a restaurant through the RestaurantId claim, not Restaurant.OwnerId
+            // (that column belongs to a different microservice/database), so fall back
+            // to the same claim-based check used for RestaurantEmployee.
+            return RestaurantId.HasValue && RestaurantId.Value == restaurantId;
         }
 
         if (IsRestaurantEmployee)
